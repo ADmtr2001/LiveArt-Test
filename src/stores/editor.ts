@@ -24,6 +24,7 @@ export const useEditorStore = defineStore('editor', () => {
 
   function resetEdits(): void {
     editDocument.value = createDefaultEditDocument()
+    isComparingOriginal.value = false
     isCropping.value = false
   }
 

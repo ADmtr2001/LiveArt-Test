@@ -9,7 +9,7 @@ import { useEditorStore } from './stores/editor'
 
 const editorStore = useEditorStore()
 const { hasEdits, hasImage, isComparingOriginal, isCropping } = storeToRefs(editorStore)
-const canCompare = computed(() => hasImage.value && !isCropping.value)
+const canCompare = computed(() => hasImage.value && hasEdits.value && !isCropping.value)
 
 onUnmounted(editorStore.clearSource)
 
@@ -24,6 +24,7 @@ const editorLayoutStyle = {
     <EditorToolbar
       :can-compare="canCompare"
       :has-edits="hasEdits"
+      :has-image="hasImage"
       :is-comparing="isComparingOriginal"
       @compare="editorStore.setComparingOriginal"
       @reset="editorStore.resetEdits"
