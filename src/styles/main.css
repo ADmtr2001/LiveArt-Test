@@ -25,6 +25,7 @@ body,
 
 body {
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 button,
@@ -32,18 +33,4 @@ input,
 textarea,
 select {
   font: inherit;
-}
-
-.app-placeholder {
-  min-height: calc(100vh - 64px);
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.5rem;
-  text-align: center;
-}
-
-.app-placeholder h1,
-.app-placeholder p {
-  margin: 0;
 }

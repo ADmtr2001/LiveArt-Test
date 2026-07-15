@@ -1,19 +1,22 @@
 <script setup lang="ts">
-import { mdiImageEditOutline } from '@mdi/js'
+import type { CSSProperties } from 'vue'
+
+import EditorToolbar from './components/editor/EditorToolbar.vue'
+import EditorWorkspace from './components/editor/EditorWorkspace.vue'
+import { EDITOR_LAYOUT } from './constants/editor'
+
+const editorLayoutStyle = {
+  '--editor-toolbar-height': `${EDITOR_LAYOUT.toolbarHeight}px`,
+  '--editor-sidebar-width': `${EDITOR_LAYOUT.sidebarWidth}px`,
+} as CSSProperties
 </script>
 
 <template>
-  <v-app>
-    <v-app-bar border="b" flat>
-      <v-app-bar-title>LiveArt</v-app-bar-title>
-    </v-app-bar>
+  <v-app :style="editorLayoutStyle">
+    <EditorToolbar />
 
     <v-main>
-      <v-container class="app-placeholder" fluid>
-        <v-icon :icon="mdiImageEditOutline" size="48" />
-        <h1 class="text-h4">Image editor</h1>
-        <p class="text-body-1 text-medium-emphasis">Workspace is ready</p>
-      </v-container>
+      <EditorWorkspace />
     </v-main>
   </v-app>
 </template>
