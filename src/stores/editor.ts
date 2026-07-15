@@ -16,6 +16,7 @@ export const useEditorStore = defineStore('editor', () => {
   const sourceError = ref<string | null>(null)
   const editDocument = ref(createDefaultEditDocument())
   const isComparingOriginal = ref(false)
+  const isCropping = ref(false)
   let loadRevision = 0
 
   const hasImage = computed(() => source.value !== null)
@@ -23,6 +24,7 @@ export const useEditorStore = defineStore('editor', () => {
 
   function resetEdits(): void {
     editDocument.value = createDefaultEditDocument()
+    isCropping.value = false
   }
 
   function setComparingOriginal(active: boolean): void {
@@ -34,6 +36,28 @@ export const useEditorStore = defineStore('editor', () => {
       ...editDocument.value,
       crop: crop ? { ...crop } : null,
     }
+  }
+
+  function enterCropMode(): void {
+    if (!source.value) {
+      return
+    }
+
+    isComparingOriginal.value = false
+    isCropping.value = true
+  }
+
+  function cancelCropMode(): void {
+    isCropping.value = false
+  }
+
+  function applyCrop(crop: CropOperation | null): void {
+    setCrop(crop)
+    isCropping.value = false
+  }
+
+  function resetCrop(): void {
+    setCrop(null)
   }
 
   function updateAdjustment(id: AdjustmentId, value: number): void {
@@ -91,6 +115,7 @@ export const useEditorStore = defineStore('editor', () => {
       revokeImageSource(source.value)
       source.value = nextSource
       isComparingOriginal.value = false
+      isCropping.value = false
       resetEdits()
     } catch (error) {
       if (revision === loadRevision) {
@@ -111,6 +136,7 @@ export const useEditorStore = defineStore('editor', () => {
     sourceError.value = null
     isLoadingSource.value = false
     isComparingOriginal.value = false
+    isCropping.value = false
     resetEdits()
   }
 
@@ -120,6 +146,7 @@ export const useEditorStore = defineStore('editor', () => {
     sourceError,
     editDocument,
     isComparingOriginal,
+    isCropping,
     hasImage,
     hasEdits,
     loadSource,
@@ -127,6 +154,10 @@ export const useEditorStore = defineStore('editor', () => {
     resetEdits,
     setComparingOriginal,
     setCrop,
+    enterCropMode,
+    cancelCropMode,
+    applyCrop,
+    resetCrop,
     updateAdjustment,
     setFilter,
   }

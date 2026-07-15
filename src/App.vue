@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { onUnmounted, type CSSProperties } from 'vue'
+import { computed, onUnmounted, type CSSProperties } from 'vue'
 
 import EditorToolbar from './components/editor/EditorToolbar.vue'
 import EditorWorkspace from './components/editor/EditorWorkspace.vue'
@@ -8,7 +8,8 @@ import { EDITOR_LAYOUT } from './constants/editor'
 import { useEditorStore } from './stores/editor'
 
 const editorStore = useEditorStore()
-const { hasEdits, hasImage, isComparingOriginal } = storeToRefs(editorStore)
+const { hasEdits, hasImage, isComparingOriginal, isCropping } = storeToRefs(editorStore)
+const canCompare = computed(() => hasImage.value && !isCropping.value)
 
 onUnmounted(editorStore.clearSource)
 
@@ -21,7 +22,7 @@ const editorLayoutStyle = {
 <template>
   <v-app :style="editorLayoutStyle">
     <EditorToolbar
-      :can-compare="hasImage"
+      :can-compare="canCompare"
       :has-edits="hasEdits"
       :is-comparing="isComparingOriginal"
       @compare="editorStore.setComparingOriginal"

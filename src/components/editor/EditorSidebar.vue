@@ -1,7 +1,25 @@
 <script setup lang="ts">
-import { mdiCrop, mdiTuneVariant } from '@mdi/js'
+import { mdiBackupRestore, mdiCrop, mdiTuneVariant } from '@mdi/js'
 
 import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constants/editor'
+
+withDefaults(
+  defineProps<{
+    hasImage?: boolean
+    hasCrop?: boolean
+    isCropping?: boolean
+  }>(),
+  {
+    hasImage: false,
+    hasCrop: false,
+    isCropping: false,
+  },
+)
+
+const emit = defineEmits<{
+  editCrop: []
+  resetCrop: []
+}>()
 </script>
 
 <template>
@@ -19,7 +37,27 @@ import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constant
     <section class="editor-sidebar__section" aria-labelledby="crop-heading">
       <h3 id="crop-heading">Crop</h3>
       <p>Choose the area you want to keep.</p>
-      <v-btn :prepend-icon="mdiCrop" block disabled variant="tonal">Crop image</v-btn>
+      <div class="editor-sidebar__crop-actions">
+        <v-btn
+          :prepend-icon="mdiCrop"
+          block
+          :disabled="!hasImage || isCropping"
+          variant="tonal"
+          @click="emit('editCrop')"
+        >
+          {{ hasCrop ? 'Edit crop' : 'Crop image' }}
+        </v-btn>
+        <v-btn
+          v-if="hasCrop"
+          :prepend-icon="mdiBackupRestore"
+          block
+          :disabled="isCropping"
+          variant="text"
+          @click="emit('resetCrop')"
+        >
+          Reset crop
+        </v-btn>
+      </div>
     </section>
 
     <v-divider />
@@ -49,7 +87,9 @@ import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constant
       </div>
     </section>
 
-    <div class="editor-sidebar__hint">Upload an image to enable editing tools.</div>
+    <div v-if="!hasImage" class="editor-sidebar__hint">
+      Upload an image to enable editing tools.
+    </div>
   </aside>
 </template>
 
@@ -109,6 +149,11 @@ import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constant
 .editor-sidebar__sliders {
   display: grid;
   gap: var(--editor-space-4);
+}
+
+.editor-sidebar__crop-actions {
+  display: grid;
+  gap: var(--editor-space-1);
 }
 
 .editor-sidebar__slider-label {

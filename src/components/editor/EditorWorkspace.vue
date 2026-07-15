@@ -3,16 +3,32 @@ import { storeToRefs } from 'pinia'
 
 import EditorSidebar from './EditorSidebar.vue'
 import EditorViewport from './EditorViewport.vue'
+import CropWorkspace from './CropWorkspace.vue'
 import { useEditorStore } from '../../stores/editor'
 
 const editorStore = useEditorStore()
-const { editDocument, isComparingOriginal, source, isLoadingSource, sourceError } =
-  storeToRefs(editorStore)
+const {
+  editDocument,
+  hasImage,
+  isComparingOriginal,
+  isCropping,
+  source,
+  isLoadingSource,
+  sourceError,
+} = storeToRefs(editorStore)
 </script>
 
 <template>
   <div class="editor-workspace">
+    <CropWorkspace
+      v-if="isCropping && source"
+      :committed-crop="editDocument.crop"
+      :source="source"
+      @apply="editorStore.applyCrop"
+      @cancel="editorStore.cancelCropMode"
+    />
     <EditorViewport
+      v-else
       :error="sourceError"
       :edit-document="editDocument"
       :is-loading="isLoadingSource"
@@ -21,7 +37,13 @@ const { editDocument, isComparingOriginal, source, isLoadingSource, sourceError 
       @file-selected="editorStore.loadSource"
       @remove-source="editorStore.clearSource"
     />
-    <EditorSidebar />
+    <EditorSidebar
+      :has-crop="editDocument.crop !== null"
+      :has-image="hasImage"
+      :is-cropping="isCropping"
+      @edit-crop="editorStore.enterCropMode"
+      @reset-crop="editorStore.resetCrop"
+    />
   </div>
 </template>
 
