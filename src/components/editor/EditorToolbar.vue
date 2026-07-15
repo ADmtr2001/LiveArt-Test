@@ -10,11 +10,13 @@ import { EDITOR_LAYOUT } from '../../constants/editor'
 
 withDefaults(
   defineProps<{
-    hasImage?: boolean
+    canCompare?: boolean
+    canExport?: boolean
     hasEdits?: boolean
   }>(),
   {
-    hasImage: false,
+    canCompare: false,
+    canExport: false,
     hasEdits: false,
   },
 )
@@ -42,7 +44,7 @@ withDefaults(
 
     <nav class="editor-toolbar__actions" aria-label="Editor actions">
       <v-btn
-        :disabled="!hasImage"
+        :disabled="!canCompare"
         :icon="mdiCompare"
         aria-label="View original"
         variant="text"
@@ -60,7 +62,7 @@ withDefaults(
       <v-btn
         class="editor-toolbar__export"
         color="primary"
-        :disabled="!hasImage"
+        :disabled="!canExport"
         :prepend-icon="mdiDownloadOutline"
         aria-label="Export image"
         variant="flat"

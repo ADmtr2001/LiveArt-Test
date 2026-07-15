@@ -2,7 +2,7 @@
 import { mdiCloudUploadOutline } from '@mdi/js'
 import { ref } from 'vue'
 
-import { IMAGE_ACCEPT_ATTRIBUTE } from '../../constants/image'
+import ImageFileInput from './ImageFileInput.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -21,23 +21,17 @@ const emit = defineEmits<{
   fileSelected: [file: File]
 }>()
 
-const fileInput = ref<HTMLInputElement | null>(null)
+const fileInput = ref<InstanceType<typeof ImageFileInput> | null>(null)
 const isDragging = ref(false)
 
 function openFilePicker(): void {
-  fileInput.value?.click()
+  fileInput.value?.open()
 }
 
 function selectFile(file: File | undefined): void {
   if (file && !props.disabled && !props.loading) {
     emit('fileSelected', file)
   }
-}
-
-function handleFileChange(event: Event): void {
-  const input = event.target as HTMLInputElement
-  selectFile(input.files?.[0])
-  input.value = ''
 }
 
 function handleDragEnter(): void {
@@ -72,15 +66,10 @@ function handleDrop(event: DragEvent): void {
     @dragleave="handleDragLeave"
     @drop.prevent="handleDrop"
   >
-    <input
+    <ImageFileInput
       ref="fileInput"
-      aria-hidden="true"
-      class="image-dropzone__input"
-      type="file"
-      :accept="IMAGE_ACCEPT_ATTRIBUTE"
       :disabled="disabled || loading"
-      tabindex="-1"
-      @change="handleFileChange"
+      @file-selected="selectFile"
     />
 
     <div class="image-dropzone__icon" aria-hidden="true">
@@ -140,10 +129,6 @@ function handleDrop(event: DragEvent): void {
 .image-dropzone--dragging {
   border-color: rgb(var(--v-theme-primary));
   background: rgb(var(--v-theme-primary), 0.1);
-}
-
-.image-dropzone__input {
-  display: none;
 }
 
 .image-dropzone__icon {

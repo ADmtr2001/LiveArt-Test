@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ImageDropzone from '../upload/ImageDropzone.vue'
+import ImageSourceControls from '../upload/ImageSourceControls.vue'
 import type { ImageSource } from '../../types/image'
 
 defineProps<{
@@ -10,18 +11,29 @@ defineProps<{
 
 const emit = defineEmits<{
   fileSelected: [file: File]
+  removeSource: []
 }>()
 </script>
 
 <template>
   <main class="editor-viewport" aria-label="Image workspace">
     <div class="editor-viewport__stage">
-      <img
-        v-if="source"
-        class="editor-viewport__image"
-        :src="source.objectUrl"
-        :alt="source.name"
-      />
+      <div v-if="source" class="editor-viewport__source">
+        <div class="editor-viewport__canvas">
+          <img
+            class="editor-viewport__image"
+            :src="source.objectUrl"
+            :alt="source.name"
+          />
+        </div>
+        <ImageSourceControls
+          :error="error"
+          :loading="isLoading"
+          :source="source"
+          @file-selected="emit('fileSelected', $event)"
+          @remove="emit('removeSource')"
+        />
+      </div>
       <ImageDropzone
         v-else
         :error="error"
@@ -69,6 +81,24 @@ const emit = defineEmits<{
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.editor-viewport__source {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.editor-viewport__canvas {
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  padding: var(--editor-space-4);
+  overflow: hidden;
 }
 
 @media (max-width: 599px) {

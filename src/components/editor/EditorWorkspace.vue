@@ -16,6 +16,7 @@ const { source, isLoadingSource, sourceError } = storeToRefs(editorStore)
       :is-loading="isLoadingSource"
       :source="source"
       @file-selected="editorStore.loadSource"
+      @remove-source="editorStore.clearSource"
     />
     <EditorSidebar />
   </div>
