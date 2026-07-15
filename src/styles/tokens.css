@@ -1,0 +1,17 @@
+:root {
+  --editor-space-1: 0.25rem;
+  --editor-space-2: 0.5rem;
+  --editor-space-3: 0.75rem;
+  --editor-space-4: 1rem;
+  --editor-space-5: 1.25rem;
+  --editor-space-6: 1.5rem;
+  --editor-space-8: 2rem;
+  --editor-page-gutter: clamp(var(--editor-space-3), 3vw, var(--editor-space-8));
+  --editor-panel-padding: clamp(var(--editor-space-4), 2vw, var(--editor-space-6));
+  --editor-radius-sm: 8px;
+  --editor-radius-md: 12px;
+  --editor-radius-lg: 16px;
+  --editor-stage-background: rgb(17 19 24 / 0.72);
+  --editor-workspace-background: #0d0f13;
+  --editor-subtle-border: rgb(255 255 255 / 0.07);
+}

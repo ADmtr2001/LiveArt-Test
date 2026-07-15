@@ -57,7 +57,7 @@ import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constant
 .editor-sidebar {
   position: relative;
   min-width: 0;
-  padding-bottom: 1.25rem;
+  padding-bottom: var(--editor-space-5);
   overflow: auto;
   border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   background: rgb(var(--v-theme-surface));
@@ -67,7 +67,7 @@ import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constant
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem;
+  padding: var(--editor-panel-padding);
 }
 
 .editor-sidebar__eyebrow {
@@ -96,7 +96,7 @@ import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constant
 }
 
 .editor-sidebar__section {
-  padding: 1.25rem 1.5rem;
+  padding: var(--editor-space-5) var(--editor-panel-padding);
 }
 
 .editor-sidebar__section > p {
@@ -108,7 +108,7 @@ import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constant
 
 .editor-sidebar__sliders {
   display: grid;
-  gap: 1rem;
+  gap: var(--editor-space-4);
 }
 
 .editor-sidebar__slider-label {
@@ -121,10 +121,10 @@ import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constant
 }
 
 .editor-sidebar__hint {
-  margin: 0.5rem 1.5rem 0;
-  padding: 0.75rem;
+  margin: var(--editor-space-2) var(--editor-panel-padding) 0;
+  padding: var(--editor-space-3);
   border: 1px solid rgb(var(--v-theme-primary), 0.12);
-  border-radius: 8px;
+  border-radius: var(--editor-radius-sm);
   color: rgb(var(--v-theme-on-surface), 0.52);
   background: rgb(var(--v-theme-primary), 0.045);
   font-size: 0.75rem;

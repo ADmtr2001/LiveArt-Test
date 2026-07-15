@@ -77,14 +77,14 @@ withDefaults(
 }
 
 .editor-toolbar :deep(.v-toolbar__content) {
-  padding-inline: clamp(1rem, 3vw, 2rem);
+  padding-inline: var(--editor-page-gutter);
 }
 
 .editor-toolbar__brand {
   display: flex;
   align-items: center;
   min-width: 0;
-  gap: 0.75rem;
+  gap: var(--editor-space-3);
 }
 
 .editor-toolbar__brand-copy {
@@ -113,7 +113,7 @@ withDefaults(
 
 .editor-toolbar__divider {
   height: 28px;
-  margin-inline: 0.5rem;
+  margin-inline: var(--editor-space-2);
 }
 
 .editor-toolbar__export {
@@ -121,10 +121,6 @@ withDefaults(
 }
 
 @media (max-width: 599px) {
-  .editor-toolbar :deep(.v-toolbar__content) {
-    padding-inline: 0.75rem;
-  }
-
   .editor-toolbar__subtitle,
   .editor-toolbar__divider,
   .editor-toolbar__export-label {
