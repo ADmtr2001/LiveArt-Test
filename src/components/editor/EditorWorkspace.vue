@@ -1,11 +1,22 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+
 import EditorSidebar from './EditorSidebar.vue'
 import EditorViewport from './EditorViewport.vue'
+import { useEditorStore } from '../../stores/editor'
+
+const editorStore = useEditorStore()
+const { source, isLoadingSource, sourceError } = storeToRefs(editorStore)
 </script>
 
 <template>
   <div class="editor-workspace">
-    <EditorViewport />
+    <EditorViewport
+      :error="sourceError"
+      :is-loading="isLoadingSource"
+      :source="source"
+      @file-selected="editorStore.loadSource"
+    />
     <EditorSidebar />
   </div>
 </template>

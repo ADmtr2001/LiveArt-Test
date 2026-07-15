@@ -1,22 +1,88 @@
 <script setup lang="ts">
 import { mdiCloudUploadOutline } from '@mdi/js'
+import { ref } from 'vue'
 
-withDefaults(
+import { IMAGE_ACCEPT_ATTRIBUTE } from '../../constants/image'
+
+const props = withDefaults(
   defineProps<{
     disabled?: boolean
+    loading?: boolean
+    error?: string | null
   }>(),
   {
-    disabled: true,
+    disabled: false,
+    loading: false,
+    error: null,
   },
 )
+
+const emit = defineEmits<{
+  fileSelected: [file: File]
+}>()
+
+const fileInput = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
+
+function openFilePicker(): void {
+  fileInput.value?.click()
+}
+
+function selectFile(file: File | undefined): void {
+  if (file && !props.disabled && !props.loading) {
+    emit('fileSelected', file)
+  }
+}
+
+function handleFileChange(event: Event): void {
+  const input = event.target as HTMLInputElement
+  selectFile(input.files?.[0])
+  input.value = ''
+}
+
+function handleDragEnter(): void {
+  isDragging.value = true
+}
+
+function handleDragLeave(event: DragEvent): void {
+  const currentTarget = event.currentTarget as HTMLElement
+
+  if (!event.relatedTarget || !currentTarget.contains(event.relatedTarget as Node)) {
+    isDragging.value = false
+  }
+}
+
+function handleDrop(event: DragEvent): void {
+  isDragging.value = false
+  selectFile(event.dataTransfer?.files[0])
+}
 </script>
 
 <template>
   <section
     class="image-dropzone"
-    :class="{ 'image-dropzone--disabled': disabled }"
+    :class="{
+      'image-dropzone--disabled': disabled,
+      'image-dropzone--dragging': isDragging,
+    }"
     aria-labelledby="upload-heading"
+    :aria-busy="loading"
+    @dragenter.prevent="handleDragEnter"
+    @dragover.prevent
+    @dragleave="handleDragLeave"
+    @drop.prevent="handleDrop"
   >
+    <input
+      ref="fileInput"
+      aria-hidden="true"
+      class="image-dropzone__input"
+      type="file"
+      :accept="IMAGE_ACCEPT_ATTRIBUTE"
+      :disabled="disabled || loading"
+      tabindex="-1"
+      @change="handleFileChange"
+    />
+
     <div class="image-dropzone__icon" aria-hidden="true">
       <v-icon :icon="mdiCloudUploadOutline" size="34" />
     </div>
@@ -26,9 +92,28 @@ withDefaults(
       <p>or choose a file from your device</p>
     </div>
 
-    <v-btn color="primary" :disabled="disabled" variant="flat">Select image</v-btn>
+    <v-btn
+      color="primary"
+      :disabled="disabled"
+      :loading="loading"
+      variant="flat"
+      @click="openFilePicker"
+    >
+      Select image
+    </v-btn>
 
     <p class="image-dropzone__formats">JPEG, PNG or WebP</p>
+
+    <v-alert
+      v-if="error"
+      class="image-dropzone__error"
+      density="compact"
+      role="alert"
+      type="error"
+      variant="tonal"
+    >
+      {{ error }}
+    </v-alert>
   </section>
 </template>
 
@@ -52,6 +137,15 @@ withDefaults(
   background: rgb(255 255 255 / 0.012);
 }
 
+.image-dropzone--dragging {
+  border-color: rgb(var(--v-theme-primary));
+  background: rgb(var(--v-theme-primary), 0.1);
+}
+
+.image-dropzone__input {
+  display: none;
+}
+
 .image-dropzone__icon {
   display: grid;
   width: 64px;
@@ -68,6 +162,12 @@ withDefaults(
 .image-dropzone__copy p,
 .image-dropzone__formats {
   margin: 0;
+}
+
+.image-dropzone__error {
+  width: 100%;
+  margin-top: var(--editor-space-4);
+  text-align: left;
 }
 
 .image-dropzone__copy h1 {

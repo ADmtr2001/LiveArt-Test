@@ -1,11 +1,33 @@
 <script setup lang="ts">
 import ImageDropzone from '../upload/ImageDropzone.vue'
+import type { ImageSource } from '../../types/image'
+
+defineProps<{
+  source: ImageSource | null
+  isLoading: boolean
+  error: string | null
+}>()
+
+const emit = defineEmits<{
+  fileSelected: [file: File]
+}>()
 </script>
 
 <template>
   <main class="editor-viewport" aria-label="Image workspace">
     <div class="editor-viewport__stage">
-      <ImageDropzone />
+      <img
+        v-if="source"
+        class="editor-viewport__image"
+        :src="source.objectUrl"
+        :alt="source.name"
+      />
+      <ImageDropzone
+        v-else
+        :error="error"
+        :loading="isLoading"
+        @file-selected="emit('fileSelected', $event)"
+      />
     </div>
   </main>
 </template>
@@ -40,6 +62,13 @@ import ImageDropzone from '../upload/ImageDropzone.vue'
   border-radius: var(--editor-radius-lg);
   background: var(--editor-stage-background);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.025);
+}
+
+.editor-viewport__image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 @media (max-width: 599px) {
