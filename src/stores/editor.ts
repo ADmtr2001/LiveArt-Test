@@ -1,17 +1,67 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
+import { ADJUSTMENT_DEFINITIONS } from '../constants/editor'
+import { createDefaultEditDocument } from '../constants/operations'
 import { createImageSource, revokeImageSource } from '../services/imageSource'
 import type { ImageSource } from '../types/image'
+import type { AdjustmentId, CropOperation, FilterOperation } from '../types/operations'
+import { clamp } from '../utils/geometry'
+import { hasDocumentEdits } from '../utils/editDocument'
 import { validateImageFile } from '../utils/fileValidation'
 
 export const useEditorStore = defineStore('editor', () => {
   const source = ref<ImageSource | null>(null)
   const isLoadingSource = ref(false)
   const sourceError = ref<string | null>(null)
+  const editDocument = ref(createDefaultEditDocument())
   let loadRevision = 0
 
   const hasImage = computed(() => source.value !== null)
+  const hasEdits = computed(() => hasDocumentEdits(editDocument.value))
+
+  function resetEdits(): void {
+    editDocument.value = createDefaultEditDocument()
+  }
+
+  function setCrop(crop: CropOperation | null): void {
+    editDocument.value = {
+      ...editDocument.value,
+      crop: crop ? { ...crop } : null,
+    }
+  }
+
+  function updateAdjustment(id: AdjustmentId, value: number): void {
+    if (!Number.isFinite(value)) {
+      return
+    }
+
+    const definition = ADJUSTMENT_DEFINITIONS.find((item) => item.id === id)
+
+    if (!definition) {
+      return
+    }
+
+    editDocument.value = {
+      ...editDocument.value,
+      adjustments: {
+        ...editDocument.value.adjustments,
+        [id]: clamp(value, definition.min, definition.max),
+      },
+    }
+  }
+
+  function setFilter(filter: FilterOperation | null): void {
+    editDocument.value = {
+      ...editDocument.value,
+      filter: filter
+        ? {
+            ...filter,
+            amount: clamp(filter.amount, 0, 1),
+          }
+        : null,
+    }
+  }
 
   async function loadSource(file: File): Promise<void> {
     const validation = validateImageFile(file)
@@ -35,6 +85,7 @@ export const useEditorStore = defineStore('editor', () => {
 
       revokeImageSource(source.value)
       source.value = nextSource
+      resetEdits()
     } catch (error) {
       if (revision === loadRevision) {
         sourceError.value =
@@ -53,14 +104,21 @@ export const useEditorStore = defineStore('editor', () => {
     source.value = null
     sourceError.value = null
     isLoadingSource.value = false
+    resetEdits()
   }
 
   return {
     source,
     isLoadingSource,
     sourceError,
+    editDocument,
     hasImage,
+    hasEdits,
     loadSource,
     clearSource,
+    resetEdits,
+    setCrop,
+    updateAdjustment,
+    setFilter,
   }
 })

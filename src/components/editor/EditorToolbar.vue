@@ -20,6 +20,10 @@ withDefaults(
     hasEdits: false,
   },
 )
+
+const emit = defineEmits<{
+  reset: []
+}>()
 </script>
 
 <template>
@@ -55,6 +59,7 @@ withDefaults(
         :icon="mdiBackupRestore"
         aria-label="Reset edits"
         variant="text"
+        @click="emit('reset')"
       />
 
       <v-divider class="editor-toolbar__divider" vertical />
