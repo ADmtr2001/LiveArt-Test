@@ -225,6 +225,7 @@ onBeforeUnmount(() => {
 
 .crop-workspace__stage {
   min-height: 0;
+  padding: var(--editor-space-4);
   overflow: hidden;
   border: 1px solid var(--editor-subtle-border);
   border-radius: var(--editor-radius-lg);

@@ -15,6 +15,7 @@ const props = withDefaults(
     canExport?: boolean
     hasEdits?: boolean
     hasImage?: boolean
+    isExporting?: boolean
     isComparing?: boolean
   }>(),
   {
@@ -22,6 +23,7 @@ const props = withDefaults(
     canExport: false,
     hasEdits: false,
     hasImage: false,
+    isExporting: false,
     isComparing: false,
   },
 )
@@ -29,6 +31,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   compare: [active: boolean]
   reset: []
+  export: []
 }>()
 
 const showResetConfirmation = ref(false)
@@ -169,9 +172,11 @@ onBeforeUnmount(() => {
         class="editor-toolbar__export"
         color="primary"
         :disabled="!canExport"
+        :loading="isExporting"
         :prepend-icon="mdiDownloadOutline"
         aria-label="Export image"
         variant="flat"
+        @click="emit('export')"
       >
         <span class="editor-toolbar__export-label">Export</span>
       </v-btn>
