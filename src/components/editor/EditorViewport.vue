@@ -1,30 +1,65 @@
 <script setup lang="ts">
+import { ref, toRef } from 'vue'
+
 import ImageDropzone from '../upload/ImageDropzone.vue'
 import ImageSourceControls from '../upload/ImageSourceControls.vue'
+import { useImageRenderer } from '../../composables/useImageRenderer'
 import type { ImageSource } from '../../types/image'
+import type { EditDocument } from '../../types/operations'
 
-defineProps<{
+const props = defineProps<{
   source: ImageSource | null
+  editDocument: EditDocument
   isLoading: boolean
   error: string | null
+  showOriginal: boolean
 }>()
 
 const emit = defineEmits<{
   fileSelected: [file: File]
   removeSource: []
 }>()
+
+const canvas = ref<HTMLCanvasElement | null>(null)
+const canvasContainer = ref<HTMLElement | null>(null)
+const { isRendering, renderError } = useImageRenderer({
+  canvas,
+  container: canvasContainer,
+  source: toRef(props, 'source'),
+  document: toRef(props, 'editDocument'),
+  showOriginal: toRef(props, 'showOriginal'),
+})
 </script>
 
 <template>
   <main class="editor-viewport" aria-label="Image workspace">
     <div class="editor-viewport__stage">
       <div v-if="source" class="editor-viewport__source">
-        <div class="editor-viewport__canvas">
-          <img
+        <div ref="canvasContainer" class="editor-viewport__canvas">
+          <canvas
+            ref="canvas"
             class="editor-viewport__image"
-            :src="source.objectUrl"
-            :alt="source.name"
+            role="img"
+            :aria-label="`Preview of ${source.name}`"
           />
+          <v-progress-circular
+            v-if="isRendering"
+            class="editor-viewport__rendering"
+            color="primary"
+            indeterminate
+            size="28"
+            width="2"
+          />
+          <v-alert
+            v-if="renderError"
+            class="editor-viewport__render-error"
+            density="compact"
+            role="alert"
+            type="error"
+            variant="tonal"
+          >
+            {{ renderError }}
+          </v-alert>
         </div>
         <ImageSourceControls
           :error="error"
@@ -94,11 +129,25 @@ const emit = defineEmits<{
 }
 
 .editor-viewport__canvas {
+  position: relative;
   display: grid;
   min-height: 0;
   place-items: center;
   padding: var(--editor-space-4);
   overflow: hidden;
+}
+
+.editor-viewport__rendering {
+  position: absolute;
+  top: var(--editor-space-4);
+  right: var(--editor-space-4);
+}
+
+.editor-viewport__render-error {
+  position: absolute;
+  right: var(--editor-space-4);
+  bottom: var(--editor-space-4);
+  left: var(--editor-space-4);
 }
 
 @media (max-width: 599px) {

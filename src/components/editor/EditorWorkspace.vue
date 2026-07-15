@@ -6,14 +6,17 @@ import EditorViewport from './EditorViewport.vue'
 import { useEditorStore } from '../../stores/editor'
 
 const editorStore = useEditorStore()
-const { source, isLoadingSource, sourceError } = storeToRefs(editorStore)
+const { editDocument, isComparingOriginal, source, isLoadingSource, sourceError } =
+  storeToRefs(editorStore)
 </script>
 
 <template>
   <div class="editor-workspace">
     <EditorViewport
       :error="sourceError"
+      :edit-document="editDocument"
       :is-loading="isLoadingSource"
+      :show-original="isComparingOriginal"
       :source="source"
       @file-selected="editorStore.loadSource"
       @remove-source="editorStore.clearSource"

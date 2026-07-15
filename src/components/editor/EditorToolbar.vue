@@ -13,15 +13,18 @@ withDefaults(
     canCompare?: boolean
     canExport?: boolean
     hasEdits?: boolean
+    isComparing?: boolean
   }>(),
   {
     canCompare: false,
     canExport: false,
     hasEdits: false,
+    isComparing: false,
   },
 )
 
 const emit = defineEmits<{
+  compare: [active: boolean]
   reset: []
 }>()
 </script>
@@ -50,8 +53,18 @@ const emit = defineEmits<{
       <v-btn
         :disabled="!canCompare"
         :icon="mdiCompare"
+        :aria-pressed="isComparing"
         aria-label="View original"
         variant="text"
+        @blur="emit('compare', false)"
+        @keydown.enter.prevent="emit('compare', true)"
+        @keydown.space.prevent="emit('compare', true)"
+        @keyup.enter.prevent="emit('compare', false)"
+        @keyup.space.prevent="emit('compare', false)"
+        @pointercancel="emit('compare', false)"
+        @pointerdown="emit('compare', true)"
+        @pointerleave="emit('compare', false)"
+        @pointerup="emit('compare', false)"
       />
 
       <v-btn

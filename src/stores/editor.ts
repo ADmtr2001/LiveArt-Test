@@ -15,6 +15,7 @@ export const useEditorStore = defineStore('editor', () => {
   const isLoadingSource = ref(false)
   const sourceError = ref<string | null>(null)
   const editDocument = ref(createDefaultEditDocument())
+  const isComparingOriginal = ref(false)
   let loadRevision = 0
 
   const hasImage = computed(() => source.value !== null)
@@ -22,6 +23,10 @@ export const useEditorStore = defineStore('editor', () => {
 
   function resetEdits(): void {
     editDocument.value = createDefaultEditDocument()
+  }
+
+  function setComparingOriginal(active: boolean): void {
+    isComparingOriginal.value = active && hasImage.value
   }
 
   function setCrop(crop: CropOperation | null): void {
@@ -85,6 +90,7 @@ export const useEditorStore = defineStore('editor', () => {
 
       revokeImageSource(source.value)
       source.value = nextSource
+      isComparingOriginal.value = false
       resetEdits()
     } catch (error) {
       if (revision === loadRevision) {
@@ -104,6 +110,7 @@ export const useEditorStore = defineStore('editor', () => {
     source.value = null
     sourceError.value = null
     isLoadingSource.value = false
+    isComparingOriginal.value = false
     resetEdits()
   }
 
@@ -112,11 +119,13 @@ export const useEditorStore = defineStore('editor', () => {
     isLoadingSource,
     sourceError,
     editDocument,
+    isComparingOriginal,
     hasImage,
     hasEdits,
     loadSource,
     clearSource,
     resetEdits,
+    setComparingOriginal,
     setCrop,
     updateAdjustment,
     setFilter,

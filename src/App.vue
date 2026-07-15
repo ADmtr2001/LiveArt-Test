@@ -8,7 +8,7 @@ import { EDITOR_LAYOUT } from './constants/editor'
 import { useEditorStore } from './stores/editor'
 
 const editorStore = useEditorStore()
-const { hasEdits } = storeToRefs(editorStore)
+const { hasEdits, hasImage, isComparingOriginal } = storeToRefs(editorStore)
 
 onUnmounted(editorStore.clearSource)
 
@@ -20,7 +20,13 @@ const editorLayoutStyle = {
 
 <template>
   <v-app :style="editorLayoutStyle">
-    <EditorToolbar :has-edits="hasEdits" @reset="editorStore.resetEdits" />
+    <EditorToolbar
+      :can-compare="hasImage"
+      :has-edits="hasEdits"
+      :is-comparing="isComparingOriginal"
+      @compare="editorStore.setComparingOriginal"
+      @reset="editorStore.resetEdits"
+    />
 
     <v-main>
       <EditorWorkspace />
