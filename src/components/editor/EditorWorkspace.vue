@@ -38,11 +38,14 @@ const {
       @remove-source="editorStore.clearSource"
     />
     <EditorSidebar
+      :adjustments="editDocument.adjustments"
       :has-crop="editDocument.crop !== null"
       :has-image="hasImage"
       :is-cropping="isCropping"
       @edit-crop="editorStore.enterCropMode"
+      @reset-adjustment="editorStore.resetAdjustment"
       @reset-crop="editorStore.resetCrop"
+      @update-adjustment="editorStore.updateAdjustment"
     />
   </div>
 </template>

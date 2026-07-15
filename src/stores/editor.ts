@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { ADJUSTMENT_DEFINITIONS } from '../constants/editor'
+import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../constants/editor'
 import { createDefaultEditDocument } from '../constants/operations'
 import { createImageSource, revokeImageSource } from '../services/imageSource'
 import type { ImageSource } from '../types/image'
@@ -78,6 +78,10 @@ export const useEditorStore = defineStore('editor', () => {
         [id]: clamp(value, definition.min, definition.max),
       },
     }
+  }
+
+  function resetAdjustment(id: AdjustmentId): void {
+    updateAdjustment(id, DEFAULT_ADJUSTMENT_VALUE)
   }
 
   function setFilter(filter: FilterOperation | null): void {
@@ -159,6 +163,7 @@ export const useEditorStore = defineStore('editor', () => {
     applyCrop,
     resetCrop,
     updateAdjustment,
+    resetAdjustment,
     setFilter,
   }
 })

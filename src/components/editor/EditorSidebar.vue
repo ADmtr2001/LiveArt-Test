@@ -2,9 +2,11 @@
 import { mdiBackupRestore, mdiCrop, mdiTuneVariant } from '@mdi/js'
 
 import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constants/editor'
+import type { AdjustmentId, AdjustmentOperation } from '../../types/operations'
 
 withDefaults(
   defineProps<{
+    adjustments: AdjustmentOperation
     hasImage?: boolean
     hasCrop?: boolean
     isCropping?: boolean
@@ -19,7 +21,13 @@ withDefaults(
 const emit = defineEmits<{
   editCrop: []
   resetCrop: []
+  updateAdjustment: [id: AdjustmentId, value: number]
+  resetAdjustment: [id: AdjustmentId]
 }>()
+
+function formatPercentage(value: number): string {
+  return `${Math.round(value * 100)}%`
+}
 </script>
 
 <template>
@@ -67,21 +75,44 @@ const emit = defineEmits<{
       <p>Fine-tune colour and tone.</p>
 
       <div class="editor-sidebar__sliders">
-        <div v-for="adjustment in ADJUSTMENT_DEFINITIONS" :key="adjustment.id">
+        <div
+          v-for="adjustment in ADJUSTMENT_DEFINITIONS"
+          :key="adjustment.id"
+          class="editor-sidebar__slider"
+        >
           <div class="editor-sidebar__slider-label">
             <span>{{ adjustment.label }}</span>
-            <span>{{ DEFAULT_ADJUSTMENT_VALUE * 100 }}%</span>
+            <div class="editor-sidebar__slider-value">
+              <output :for="`adjustment-${adjustment.id}`">
+                {{ formatPercentage(adjustments[adjustment.id]) }}
+              </output>
+              <v-btn
+                :aria-label="`Reset ${adjustment.label.toLowerCase()} to 100%`"
+                :disabled="
+                  !hasImage ||
+                  isCropping ||
+                  adjustments[adjustment.id] === DEFAULT_ADJUSTMENT_VALUE
+                "
+                :icon="mdiBackupRestore"
+                size="x-small"
+                title="Reset to 100%"
+                variant="text"
+                @click="emit('resetAdjustment', adjustment.id)"
+              />
+            </div>
           </div>
           <v-slider
+            :id="`adjustment-${adjustment.id}`"
             :aria-label="adjustment.label"
             color="primary"
             density="compact"
-            disabled
+            :disabled="!hasImage || isCropping"
             hide-details
             :max="adjustment.max"
             :min="adjustment.min"
-            :model-value="DEFAULT_ADJUSTMENT_VALUE"
+            :model-value="adjustments[adjustment.id]"
             :step="0.01"
+            @update:model-value="emit('updateAdjustment', adjustment.id, $event)"
           />
         </div>
       </div>
@@ -165,6 +196,19 @@ const emit = defineEmits<{
   font-variant-numeric: tabular-nums;
 }
 
+.editor-sidebar__slider-value {
+  display: flex;
+  min-width: 4.75rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--editor-space-1);
+}
+
+.editor-sidebar__slider-value output {
+  min-width: 2.75rem;
+  text-align: right;
+}
+
 .editor-sidebar__hint {
   margin: var(--editor-space-2) var(--editor-panel-padding) 0;
   padding: var(--editor-space-3);
@@ -185,6 +229,16 @@ const emit = defineEmits<{
 
   .editor-sidebar__section {
     max-width: 720px;
+  }
+
+  .editor-sidebar__sliders {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 599px) {
+  .editor-sidebar__sliders {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>
