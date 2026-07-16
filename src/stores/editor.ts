@@ -91,12 +91,13 @@ export const useEditorStore = defineStore('editor', () => {
   function setFilter(filter: FilterOperation | null): void {
     editDocument.value = {
       ...editDocument.value,
-      filter: filter
-        ? {
-            ...filter,
-            amount: clamp(filter.amount, 0, 1),
-          }
-        : null,
+      filter:
+        filter && Number.isFinite(filter.amount) && filter.amount > 0
+          ? {
+              ...filter,
+              amount: clamp(filter.amount, 0, 1),
+            }
+          : null,
     }
   }
 

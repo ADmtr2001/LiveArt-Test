@@ -21,17 +21,21 @@ export function buildCanvasFilter(document: EditDocument, showOriginal = false):
   }
 
   const filters = [
-    `brightness(${document.adjustments.brightness * 100}%)`,
-    `contrast(${document.adjustments.contrast * 100}%)`,
-    `saturate(${document.adjustments.saturation * 100}%)`,
+    `brightness(${toPercentage(document.adjustments.brightness)}%)`,
+    `contrast(${toPercentage(document.adjustments.contrast)}%)`,
+    `saturate(${toPercentage(document.adjustments.saturation)}%)`,
   ]
 
   if (document.filter) {
     const filterName = document.filter.name === 'greyscale' ? 'grayscale' : 'sepia'
-    filters.push(`${filterName}(${document.filter.amount * 100}%)`)
+    filters.push(`${filterName}(${toPercentage(document.filter.amount)}%)`)
   }
 
   return filters.join(' ')
+}
+
+function toPercentage(value: number): number {
+  return Number((value * 100).toFixed(2))
 }
 
 export function renderImageToCanvas({

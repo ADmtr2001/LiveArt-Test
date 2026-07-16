@@ -2,11 +2,23 @@
 import { mdiBackupRestore, mdiCrop, mdiTuneVariant } from '@mdi/js'
 
 import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constants/editor'
-import type { AdjustmentId, AdjustmentOperation } from '../../types/operations'
+import {
+  DEFAULT_FILTER_AMOUNT,
+  FILTER_DEFINITIONS,
+  MAX_FILTER_AMOUNT,
+  MIN_FILTER_AMOUNT,
+} from '../../constants/filters'
+import type {
+  AdjustmentId,
+  AdjustmentOperation,
+  FilterName,
+  FilterOperation,
+} from '../../types/operations'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     adjustments: AdjustmentOperation
+    filter: FilterOperation | null
     hasImage?: boolean
     hasCrop?: boolean
     isCropping?: boolean
@@ -23,10 +35,26 @@ const emit = defineEmits<{
   resetCrop: []
   updateAdjustment: [id: AdjustmentId, value: number]
   resetAdjustment: [id: AdjustmentId]
+  setFilter: [filter: FilterOperation | null]
 }>()
 
 function formatPercentage(value: number): string {
   return `${Math.round(value * 100)}%`
+}
+
+function toggleFilter(name: FilterName): void {
+  emit(
+    'setFilter',
+    props.filter?.name === name
+      ? null
+      : { type: 'filter', name, amount: DEFAULT_FILTER_AMOUNT },
+  )
+}
+
+function updateFilterAmount(amount: number): void {
+  if (props.filter) {
+    emit('setFilter', { ...props.filter, amount })
+  }
 }
 </script>
 
@@ -118,6 +146,48 @@ function formatPercentage(value: number): string {
       </div>
     </section>
 
+    <v-divider />
+
+    <section class="editor-sidebar__section" aria-labelledby="filters-heading">
+      <h3 id="filters-heading">Filters</h3>
+      <p>Apply a reusable colour treatment.</p>
+
+      <div class="editor-sidebar__filter-options" aria-label="Image filter" role="group">
+        <v-btn
+          v-for="filterDefinition in FILTER_DEFINITIONS"
+          :key="filterDefinition.id"
+          :active="filter?.name === filterDefinition.id"
+          :aria-pressed="filter?.name === filterDefinition.id"
+          :disabled="!hasImage || isCropping"
+          size="small"
+          variant="tonal"
+          @click="toggleFilter(filterDefinition.id)"
+        >
+          {{ filterDefinition.label }}
+        </v-btn>
+      </div>
+
+      <div v-if="filter" class="editor-sidebar__filter-amount">
+        <div class="editor-sidebar__slider-label">
+          <span>Amount</span>
+          <output for="filter-amount">{{ formatPercentage(filter.amount) }}</output>
+        </div>
+        <v-slider
+          id="filter-amount"
+          aria-label="Filter amount"
+          color="primary"
+          density="compact"
+          :disabled="!hasImage || isCropping"
+          hide-details
+          :max="MAX_FILTER_AMOUNT"
+          :min="MIN_FILTER_AMOUNT"
+          :model-value="filter.amount"
+          :step="0.01"
+          @update:model-value="updateFilterAmount"
+        />
+      </div>
+    </section>
+
     <div v-if="!hasImage" class="editor-sidebar__hint">
       Upload an image to enable editing tools.
     </div>
@@ -185,6 +255,16 @@ function formatPercentage(value: number): string {
 .editor-sidebar__crop-actions {
   display: grid;
   gap: var(--editor-space-1);
+}
+
+.editor-sidebar__filter-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--editor-space-2);
+}
+
+.editor-sidebar__filter-amount {
+  margin-top: var(--editor-space-4);
 }
 
 .editor-sidebar__slider-label {

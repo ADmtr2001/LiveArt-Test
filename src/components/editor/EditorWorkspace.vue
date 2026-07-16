@@ -39,12 +39,14 @@ const {
     />
     <EditorSidebar
       :adjustments="editDocument.adjustments"
+      :filter="editDocument.filter"
       :has-crop="editDocument.crop !== null"
       :has-image="hasImage"
       :is-cropping="isCropping"
       @edit-crop="editorStore.enterCropMode"
       @reset-adjustment="editorStore.resetAdjustment"
       @reset-crop="editorStore.resetCrop"
+      @set-filter="editorStore.setFilter"
       @update-adjustment="editorStore.updateAdjustment"
     />
   </div>
