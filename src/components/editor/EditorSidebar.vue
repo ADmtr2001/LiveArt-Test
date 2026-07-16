@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { mdiBackupRestore, mdiCodeJson, mdiCrop, mdiTuneVariant } from '@mdi/js'
+import {
+  mdiBackupRestore,
+  mdiCodeJson,
+  mdiCrop,
+  mdiFileImportOutline,
+  mdiTuneVariant,
+} from '@mdi/js'
 import { ref } from 'vue'
 
 import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constants/editor'
@@ -23,11 +29,13 @@ const props = withDefaults(
     hasImage?: boolean
     hasCrop?: boolean
     isCropping?: boolean
+    isImportingRecipe?: boolean
   }>(),
   {
     hasImage: false,
     hasCrop: false,
     isCropping: false,
+    isImportingRecipe: false,
   },
 )
 
@@ -38,10 +46,26 @@ const emit = defineEmits<{
   resetAdjustment: [id: AdjustmentId]
   setFilter: [filter: FilterOperation | null]
   exportRecipe: []
+  importRecipe: [file: File]
 }>()
 
 type ToolPanel = 'crop' | 'adjustments' | 'filters'
 const activeTool = ref<ToolPanel>('adjustments')
+const recipeInput = ref<HTMLInputElement | null>(null)
+
+function selectRecipe(): void {
+  recipeInput.value?.click()
+}
+
+function handleRecipeSelection(event: Event): void {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+
+  if (file) {
+    emit('importRecipe', file)
+  }
+}
 
 function formatPercentage(value: number): string {
   return `${Math.round(value * 100)}%`
@@ -208,16 +232,39 @@ function updateFilterAmount(amount: number): void {
         />
       </div>
 
-      <v-btn
-        class="editor-sidebar__recipe"
-        :disabled="!hasImage || isCropping"
-        :prepend-icon="mdiCodeJson"
-        size="small"
-        variant="outlined"
-        @click="emit('exportRecipe')"
-      >
-        Download recipe
-      </v-btn>
+      <div class="editor-sidebar__recipe-actions">
+        <input
+          ref="recipeInput"
+          accept="application/json,.json"
+          aria-hidden="true"
+          class="editor-sidebar__recipe-input"
+          :disabled="!hasImage || isCropping || isImportingRecipe"
+          tabindex="-1"
+          type="file"
+          @change="handleRecipeSelection"
+        />
+        <v-btn
+          aria-label="Import edit recipe JSON"
+          :disabled="!hasImage || isCropping || isImportingRecipe"
+          :loading="isImportingRecipe"
+          :prepend-icon="mdiFileImportOutline"
+          size="small"
+          variant="outlined"
+          @click="selectRecipe"
+        >
+          Import JSON
+        </v-btn>
+        <v-btn
+          aria-label="Download edit recipe JSON"
+          :disabled="!hasImage || isCropping || isImportingRecipe"
+          :prepend-icon="mdiCodeJson"
+          size="small"
+          variant="outlined"
+          @click="emit('exportRecipe')"
+        >
+          Export JSON
+        </v-btn>
+      </div>
     </section>
   </aside>
 </template>
@@ -303,9 +350,15 @@ function updateFilterAmount(amount: number): void {
   margin-top: var(--editor-space-4);
 }
 
-.editor-sidebar__recipe {
-  width: 100%;
+.editor-sidebar__recipe-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--editor-space-2);
   margin-top: var(--editor-space-4);
+}
+
+.editor-sidebar__recipe-input {
+  display: none;
 }
 
 .editor-sidebar__slider-label {

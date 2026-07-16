@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 
 import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../constants/editor'
 import { createDefaultEditDocument } from '../constants/operations'
-import { downloadEditRecipe } from '../services/editRecipe'
+import { downloadEditRecipe, importEditRecipe } from '../services/editRecipe'
 import { exportEditedImage } from '../services/imageExport'
 import { createImageSource, revokeImageSource } from '../services/imageSource'
 import type { ImageSource } from '../types/image'
@@ -21,6 +21,8 @@ export const useEditorStore = defineStore('editor', () => {
   const isCropping = ref(false)
   const isExporting = ref(false)
   const exportError = ref<string | null>(null)
+  const isImportingRecipe = ref(false)
+  const recipeError = ref<string | null>(null)
   let loadRevision = 0
 
   const hasImage = computed(() => source.value !== null)
@@ -144,6 +146,35 @@ export const useEditorStore = defineStore('editor', () => {
     }
   }
 
+  async function loadRecipe(file: File): Promise<void> {
+    if (!source.value || isCropping.value || isImportingRecipe.value) {
+      return
+    }
+
+    const currentSource = source.value
+    isImportingRecipe.value = true
+    recipeError.value = null
+
+    try {
+      const importedDocument = await importEditRecipe(file, currentSource)
+      if (source.value !== currentSource) {
+        return
+      }
+
+      editDocument.value = importedDocument
+      isComparingOriginal.value = false
+    } catch (error) {
+      recipeError.value =
+        error instanceof Error ? error.message : 'The edit recipe could not be imported.'
+    } finally {
+      isImportingRecipe.value = false
+    }
+  }
+
+  function clearRecipeError(): void {
+    recipeError.value = null
+  }
+
   async function loadSource(file: File): Promise<void> {
     const validation = validateImageFile(file)
 
@@ -155,6 +186,7 @@ export const useEditorStore = defineStore('editor', () => {
     const revision = ++loadRevision
     isLoadingSource.value = true
     sourceError.value = null
+    recipeError.value = null
 
     try {
       const nextSource = await createImageSource(file)
@@ -190,6 +222,8 @@ export const useEditorStore = defineStore('editor', () => {
     isComparingOriginal.value = false
     isCropping.value = false
     exportError.value = null
+    recipeError.value = null
+    isImportingRecipe.value = false
     resetEdits()
   }
 
@@ -202,6 +236,8 @@ export const useEditorStore = defineStore('editor', () => {
     isCropping,
     isExporting,
     exportError,
+    isImportingRecipe,
+    recipeError,
     hasImage,
     hasEdits,
     loadSource,
@@ -218,6 +254,8 @@ export const useEditorStore = defineStore('editor', () => {
     setFilter,
     exportImage,
     exportRecipe,
+    loadRecipe,
     clearExportError,
+    clearRecipeError,
   }
 })

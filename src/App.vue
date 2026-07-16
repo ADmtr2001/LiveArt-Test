@@ -8,8 +8,15 @@ import { EDITOR_LAYOUT } from './constants/editor'
 import { useEditorStore } from './stores/editor'
 
 const editorStore = useEditorStore()
-const { exportError, hasEdits, hasImage, isComparingOriginal, isCropping, isExporting } =
-  storeToRefs(editorStore)
+const {
+  exportError,
+  hasEdits,
+  hasImage,
+  isComparingOriginal,
+  isCropping,
+  isExporting,
+  recipeError,
+} = storeToRefs(editorStore)
 const canCompare = computed(() => hasImage.value && hasEdits.value && !isCropping.value)
 const canExport = computed(
   () => hasImage.value && !isCropping.value && !isExporting.value,
@@ -53,6 +60,24 @@ const editorLayoutStyle = {
           aria-label="Dismiss export error"
           variant="text"
           @click="editorStore.clearExportError"
+        >
+          Dismiss
+        </v-btn>
+      </template>
+    </v-snackbar>
+
+    <v-snackbar
+      aria-live="assertive"
+      :model-value="Boolean(recipeError)"
+      role="alert"
+      :timeout="-1"
+    >
+      {{ recipeError }}
+      <template #actions>
+        <v-btn
+          aria-label="Dismiss recipe error"
+          variant="text"
+          @click="editorStore.clearRecipeError"
         >
           Dismiss
         </v-btn>

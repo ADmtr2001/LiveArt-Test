@@ -14,6 +14,7 @@ const {
   isCropping,
   source,
   isLoadingSource,
+  isImportingRecipe,
   sourceError,
 } = storeToRefs(editorStore)
 </script>
@@ -43,8 +44,10 @@ const {
       :has-crop="editDocument.crop !== null"
       :has-image="hasImage"
       :is-cropping="isCropping"
+      :is-importing-recipe="isImportingRecipe"
       @edit-crop="editorStore.enterCropMode"
       @export-recipe="editorStore.exportRecipe"
+      @import-recipe="editorStore.loadRecipe"
       @reset-adjustment="editorStore.resetAdjustment"
       @reset-crop="editorStore.resetCrop"
       @set-filter="editorStore.setFilter"
