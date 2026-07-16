@@ -1,6 +1,7 @@
 import { EXPORT_FORMAT } from '../constants/export'
 import type { ImageSource } from '../types/image'
 import type { EditDocument } from '../types/operations'
+import { createSafeFileStem } from '../utils/filename'
 import { loadImageElement } from './imageLoader'
 import { renderImageToCanvas } from './imageRenderer'
 
@@ -10,13 +11,7 @@ interface ExportImageOptions {
 }
 
 export function createExportFilename(sourceName: string): string {
-  const baseName = sourceName.replace(/\.[^.]+$/, '')
-  const safeName = baseName
-    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-')
-    .replace(/[. ]+$/g, '')
-    .trim()
-
-  return `${safeName || 'image'}-${EXPORT_FORMAT.suffix}.${EXPORT_FORMAT.extension}`
+  return `${createSafeFileStem(sourceName)}-${EXPORT_FORMAT.suffix}.${EXPORT_FORMAT.extension}`
 }
 
 export function canvasToBlob(

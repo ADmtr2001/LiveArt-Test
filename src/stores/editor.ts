@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../constants/editor'
 import { createDefaultEditDocument } from '../constants/operations'
+import { downloadEditRecipe } from '../services/editRecipe'
 import { exportEditedImage } from '../services/imageExport'
 import { createImageSource, revokeImageSource } from '../services/imageSource'
 import type { ImageSource } from '../types/image'
@@ -128,6 +129,21 @@ export const useEditorStore = defineStore('editor', () => {
     exportError.value = null
   }
 
+  function exportRecipe(): void {
+    if (!source.value || isCropping.value || isExporting.value) {
+      return
+    }
+
+    exportError.value = null
+
+    try {
+      downloadEditRecipe(source.value, cloneEditDocument(editDocument.value))
+    } catch (error) {
+      exportError.value =
+        error instanceof Error ? error.message : 'The edit recipe could not be exported.'
+    }
+  }
+
   async function loadSource(file: File): Promise<void> {
     const validation = validateImageFile(file)
 
@@ -201,6 +217,7 @@ export const useEditorStore = defineStore('editor', () => {
     resetAdjustment,
     setFilter,
     exportImage,
+    exportRecipe,
     clearExportError,
   }
 })

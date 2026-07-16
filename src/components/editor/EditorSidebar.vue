@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { mdiBackupRestore, mdiCrop, mdiTuneVariant } from '@mdi/js'
+import { mdiBackupRestore, mdiCodeJson, mdiCrop, mdiTuneVariant } from '@mdi/js'
+import { ref } from 'vue'
 
 import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constants/editor'
 import {
@@ -36,7 +37,11 @@ const emit = defineEmits<{
   updateAdjustment: [id: AdjustmentId, value: number]
   resetAdjustment: [id: AdjustmentId]
   setFilter: [filter: FilterOperation | null]
+  exportRecipe: []
 }>()
+
+type ToolPanel = 'crop' | 'adjustments' | 'filters'
+const activeTool = ref<ToolPanel>('adjustments')
 
 function formatPercentage(value: number): string {
   return `${Math.round(value * 100)}%`
@@ -68,9 +73,21 @@ function updateFilterAmount(amount: number): void {
       <v-icon :icon="mdiTuneVariant" size="20" />
     </div>
 
+    <v-divider class="editor-sidebar__header-divider" />
+
+    <v-tabs v-model="activeTool" class="editor-sidebar__tabs" density="compact" grow>
+      <v-tab value="crop">Crop</v-tab>
+      <v-tab value="adjustments">Adjust</v-tab>
+      <v-tab value="filters">Filters</v-tab>
+    </v-tabs>
+
     <v-divider />
 
-    <section class="editor-sidebar__section" aria-labelledby="crop-heading">
+    <section
+      v-show="activeTool === 'crop'"
+      class="editor-sidebar__section"
+      aria-labelledby="crop-heading"
+    >
       <h3 id="crop-heading">Crop</h3>
       <p>Choose the area you want to keep.</p>
       <div class="editor-sidebar__crop-actions">
@@ -96,9 +113,11 @@ function updateFilterAmount(amount: number): void {
       </div>
     </section>
 
-    <v-divider />
-
-    <section class="editor-sidebar__section" aria-labelledby="adjustments-heading">
+    <section
+      v-show="activeTool === 'adjustments'"
+      class="editor-sidebar__section"
+      aria-labelledby="adjustments-heading"
+    >
       <h3 id="adjustments-heading">Adjustments</h3>
       <p>Fine-tune colour and tone.</p>
 
@@ -146,9 +165,11 @@ function updateFilterAmount(amount: number): void {
       </div>
     </section>
 
-    <v-divider />
-
-    <section class="editor-sidebar__section" aria-labelledby="filters-heading">
+    <section
+      v-show="activeTool === 'filters'"
+      class="editor-sidebar__section"
+      aria-labelledby="filters-heading"
+    >
       <h3 id="filters-heading">Filters</h3>
       <p>Apply a reusable colour treatment.</p>
 
@@ -186,22 +207,35 @@ function updateFilterAmount(amount: number): void {
           @update:model-value="updateFilterAmount"
         />
       </div>
-    </section>
 
-    <div v-if="!hasImage" class="editor-sidebar__hint">
-      Upload an image to enable editing tools.
-    </div>
+      <v-btn
+        class="editor-sidebar__recipe"
+        :disabled="!hasImage || isCropping"
+        :prepend-icon="mdiCodeJson"
+        size="small"
+        variant="outlined"
+        @click="emit('exportRecipe')"
+      >
+        Download recipe
+      </v-btn>
+    </section>
   </aside>
 </template>
 
 <style scoped>
 .editor-sidebar {
   position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
   min-width: 0;
-  padding-bottom: var(--editor-space-5);
-  overflow: auto;
+  min-height: 0;
+  overflow: hidden;
   border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   background: rgb(var(--v-theme-surface));
+}
+
+.editor-sidebar__tabs {
+  min-width: 0;
 }
 
 .editor-sidebar__header {
@@ -237,7 +271,9 @@ function updateFilterAmount(amount: number): void {
 }
 
 .editor-sidebar__section {
+  min-height: 0;
   padding: var(--editor-space-5) var(--editor-panel-padding);
+  overflow: hidden;
 }
 
 .editor-sidebar__section > p {
@@ -267,6 +303,11 @@ function updateFilterAmount(amount: number): void {
   margin-top: var(--editor-space-4);
 }
 
+.editor-sidebar__recipe {
+  width: 100%;
+  margin-top: var(--editor-space-4);
+}
+
 .editor-sidebar__slider-label {
   display: flex;
   justify-content: space-between;
@@ -289,20 +330,8 @@ function updateFilterAmount(amount: number): void {
   text-align: right;
 }
 
-.editor-sidebar__hint {
-  margin: var(--editor-space-2) var(--editor-panel-padding) 0;
-  padding: var(--editor-space-3);
-  border: 1px solid rgb(var(--v-theme-primary), 0.12);
-  border-radius: var(--editor-radius-sm);
-  color: rgb(var(--v-theme-on-surface), 0.52);
-  background: rgb(var(--v-theme-primary), 0.045);
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
 @media (max-width: 959px) {
   .editor-sidebar {
-    overflow: visible;
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
     border-left: 0;
   }
@@ -317,8 +346,37 @@ function updateFilterAmount(amount: number): void {
 }
 
 @media (max-width: 599px) {
+  .editor-sidebar {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .editor-sidebar__header,
+  .editor-sidebar__header-divider {
+    display: none;
+  }
+
+  .editor-sidebar__section {
+    padding: var(--editor-space-3) var(--editor-space-4);
+  }
+
+  .editor-sidebar__section > p {
+    margin-top: var(--editor-space-1);
+    margin-bottom: var(--editor-space-2);
+  }
+
   .editor-sidebar__sliders {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--editor-space-3);
+  }
+
+  .editor-sidebar__slider-label {
+    display: grid;
+    gap: var(--editor-space-1);
+  }
+
+  .editor-sidebar__slider-value {
+    min-width: 0;
+    justify-content: space-between;
   }
 }
 </style>
