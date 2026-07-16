@@ -174,7 +174,7 @@ onBeforeUnmount(() => {
         :disabled="!canExport"
         :loading="isExporting"
         :prepend-icon="mdiDownloadOutline"
-        aria-label="Export image"
+        :aria-label="isExporting ? 'Exporting image' : 'Export image'"
         variant="flat"
         @click="emit('export')"
       >

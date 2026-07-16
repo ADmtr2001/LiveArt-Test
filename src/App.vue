@@ -41,10 +41,21 @@ const editorLayoutStyle = {
       <EditorWorkspace />
     </v-main>
 
-    <v-snackbar :model-value="Boolean(exportError)" :timeout="-1">
+    <v-snackbar
+      aria-live="assertive"
+      :model-value="Boolean(exportError)"
+      role="alert"
+      :timeout="-1"
+    >
       {{ exportError }}
       <template #actions>
-        <v-btn variant="text" @click="editorStore.clearExportError">Dismiss</v-btn>
+        <v-btn
+          aria-label="Dismiss export error"
+          variant="text"
+          @click="editorStore.clearExportError"
+        >
+          Dismiss
+        </v-btn>
       </template>
     </v-snackbar>
   </v-app>

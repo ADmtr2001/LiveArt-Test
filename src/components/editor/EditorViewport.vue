@@ -32,7 +32,7 @@ const { isRendering, renderError } = useImageRenderer({
 </script>
 
 <template>
-  <main class="editor-viewport" aria-label="Image workspace">
+  <section class="editor-viewport" aria-label="Image workspace">
     <div class="editor-viewport__stage">
       <div v-if="source" class="editor-viewport__source">
         <div ref="canvasContainer" class="editor-viewport__canvas">
@@ -44,9 +44,11 @@ const { isRendering, renderError } = useImageRenderer({
           />
           <v-progress-circular
             v-if="isRendering"
+            aria-label="Rendering preview"
             class="editor-viewport__rendering"
             color="primary"
             indeterminate
+            role="status"
             size="28"
             width="2"
           />
@@ -76,7 +78,7 @@ const { isRendering, renderError } = useImageRenderer({
         @file-selected="emit('fileSelected', $event)"
       />
     </div>
-  </main>
+  </section>
 </template>
 
 <style scoped>

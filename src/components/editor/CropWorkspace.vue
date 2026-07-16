@@ -127,7 +127,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="crop-workspace" aria-labelledby="crop-mode-heading">
+  <section class="crop-workspace" aria-labelledby="crop-mode-heading">
     <div class="crop-workspace__header">
       <div>
         <p>Crop mode</p>
@@ -176,7 +176,7 @@ onBeforeUnmount(() => {
         Apply crop
       </v-btn>
     </div>
-  </main>
+  </section>
 </template>
 
 <style scoped>
