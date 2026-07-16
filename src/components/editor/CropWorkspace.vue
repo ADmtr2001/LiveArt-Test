@@ -185,8 +185,12 @@ onBeforeUnmount(() => {
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-width: 0;
   min-height: 0;
-  padding: var(--editor-page-gutter);
-  background: var(--editor-workspace-background);
+  padding: var(--editor-space-4);
+  overflow: hidden;
+  border: 1px solid var(--editor-subtle-border);
+  border-radius: var(--editor-radius-lg);
+  background: var(--editor-island-background);
+  box-shadow: var(--editor-island-shadow);
 }
 
 .crop-workspace__header {
@@ -235,7 +239,7 @@ onBeforeUnmount(() => {
 .crop-workspace__cropper {
   width: 100%;
   height: 100%;
-  min-height: 300px;
+  min-height: 0;
   background: #090b0e;
 }
 
@@ -247,6 +251,11 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 599px) {
+  .crop-workspace {
+    padding: var(--editor-space-3);
+    border-radius: var(--editor-radius-md);
+  }
+
   .crop-workspace__header > span {
     display: none;
   }

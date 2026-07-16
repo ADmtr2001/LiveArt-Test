@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-  mdiBackupRestore,
-  mdiCodeJson,
-  mdiCrop,
-  mdiFileImportOutline,
-  mdiTuneVariant,
-} from '@mdi/js'
+import { mdiBackupRestore, mdiCrop, mdiTuneVariant } from '@mdi/js'
 import { ref } from 'vue'
 
 import { ADJUSTMENT_DEFINITIONS, DEFAULT_ADJUSTMENT_VALUE } from '../../constants/editor'
@@ -29,13 +23,11 @@ const props = withDefaults(
     hasImage?: boolean
     hasCrop?: boolean
     isCropping?: boolean
-    isImportingRecipe?: boolean
   }>(),
   {
     hasImage: false,
     hasCrop: false,
     isCropping: false,
-    isImportingRecipe: false,
   },
 )
 
@@ -45,27 +37,10 @@ const emit = defineEmits<{
   updateAdjustment: [id: AdjustmentId, value: number]
   resetAdjustment: [id: AdjustmentId]
   setFilter: [filter: FilterOperation | null]
-  exportRecipe: []
-  importRecipe: [file: File]
 }>()
 
 type ToolPanel = 'crop' | 'adjustments' | 'filters'
 const activeTool = ref<ToolPanel>('adjustments')
-const recipeInput = ref<HTMLInputElement | null>(null)
-
-function selectRecipe(): void {
-  recipeInput.value?.click()
-}
-
-function handleRecipeSelection(event: Event): void {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-
-  if (file) {
-    emit('importRecipe', file)
-  }
-}
 
 function formatPercentage(value: number): string {
   return `${Math.round(value * 100)}%`
@@ -139,7 +114,7 @@ function updateFilterAmount(amount: number): void {
 
     <section
       v-show="activeTool === 'adjustments'"
-      class="editor-sidebar__section"
+      class="editor-sidebar__section editor-sidebar__section--adjustments"
       aria-labelledby="adjustments-heading"
     >
       <h3 id="adjustments-heading">Adjustments</h3>
@@ -231,40 +206,6 @@ function updateFilterAmount(amount: number): void {
           @update:model-value="updateFilterAmount"
         />
       </div>
-
-      <div class="editor-sidebar__recipe-actions">
-        <input
-          ref="recipeInput"
-          accept="application/json,.json"
-          aria-hidden="true"
-          class="editor-sidebar__recipe-input"
-          :disabled="!hasImage || isCropping || isImportingRecipe"
-          tabindex="-1"
-          type="file"
-          @change="handleRecipeSelection"
-        />
-        <v-btn
-          aria-label="Import edit recipe JSON"
-          :disabled="!hasImage || isCropping || isImportingRecipe"
-          :loading="isImportingRecipe"
-          :prepend-icon="mdiFileImportOutline"
-          size="small"
-          variant="outlined"
-          @click="selectRecipe"
-        >
-          Import JSON
-        </v-btn>
-        <v-btn
-          aria-label="Download edit recipe JSON"
-          :disabled="!hasImage || isCropping || isImportingRecipe"
-          :prepend-icon="mdiCodeJson"
-          size="small"
-          variant="outlined"
-          @click="emit('exportRecipe')"
-        >
-          Export JSON
-        </v-btn>
-      </div>
     </section>
   </aside>
 </template>
@@ -277,8 +218,11 @@ function updateFilterAmount(amount: number): void {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-  background: rgb(var(--v-theme-surface));
+  border: 1px solid var(--editor-subtle-border);
+  border-radius: var(--editor-radius-lg);
+  background: var(--editor-island-background);
+  box-shadow: var(--editor-island-shadow);
+  backdrop-filter: var(--editor-surface-filter);
 }
 
 .editor-sidebar__tabs {
@@ -350,17 +294,6 @@ function updateFilterAmount(amount: number): void {
   margin-top: var(--editor-space-4);
 }
 
-.editor-sidebar__recipe-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--editor-space-2);
-  margin-top: var(--editor-space-4);
-}
-
-.editor-sidebar__recipe-input {
-  display: none;
-}
-
 .editor-sidebar__slider-label {
   display: flex;
   justify-content: space-between;
@@ -385,8 +318,7 @@ function updateFilterAmount(amount: number): void {
 
 @media (max-width: 959px) {
   .editor-sidebar {
-    border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-    border-left: 0;
+    border: 1px solid var(--editor-subtle-border);
   }
 
   .editor-sidebar__section {
@@ -401,6 +333,7 @@ function updateFilterAmount(amount: number): void {
 @media (max-width: 599px) {
   .editor-sidebar {
     grid-template-rows: auto auto minmax(0, 1fr);
+    border-radius: var(--editor-radius-md);
   }
 
   .editor-sidebar__header,
@@ -418,18 +351,34 @@ function updateFilterAmount(amount: number): void {
   }
 
   .editor-sidebar__sliders {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--editor-space-3);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
   }
 
   .editor-sidebar__slider-label {
-    display: grid;
-    gap: var(--editor-space-1);
+    display: flex;
   }
 
   .editor-sidebar__slider-value {
-    min-width: 0;
-    justify-content: space-between;
+    min-width: 4.75rem;
+    justify-content: flex-end;
+  }
+
+  .editor-sidebar__section--adjustments > h3,
+  .editor-sidebar__section--adjustments > p {
+    display: none;
+  }
+
+  .editor-sidebar__section--adjustments {
+    padding-block: var(--editor-space-2);
+  }
+
+  .editor-sidebar__section--adjustments .editor-sidebar__slider-label {
+    margin-bottom: 0;
+  }
+
+  .editor-sidebar__section--adjustments .editor-sidebar__slider :deep(.v-slider) {
+    height: 28px;
   }
 }
 </style>

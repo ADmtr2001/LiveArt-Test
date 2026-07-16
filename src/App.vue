@@ -8,16 +8,8 @@ import { EDITOR_LAYOUT } from './constants/editor'
 import { useEditorStore } from './stores/editor'
 
 const editorStore = useEditorStore()
-const {
-  exportError,
-  hasEdits,
-  hasImage,
-  isComparingOriginal,
-  isCropping,
-  isExporting,
-  recipeError,
-} = storeToRefs(editorStore)
-const canCompare = computed(() => hasImage.value && hasEdits.value && !isCropping.value)
+const { exportError, hasImage, isCropping, isExporting, isImportingRecipe, recipeError } =
+  storeToRefs(editorStore)
 const canExport = computed(
   () => hasImage.value && !isCropping.value && !isExporting.value,
 )
@@ -33,15 +25,13 @@ const editorLayoutStyle = {
 <template>
   <v-app :style="editorLayoutStyle">
     <EditorToolbar
-      :can-compare="canCompare"
       :can-export="canExport"
-      :has-edits="hasEdits"
       :has-image="hasImage"
-      :is-comparing="isComparingOriginal"
       :is-exporting="isExporting"
-      @compare="editorStore.setComparingOriginal"
+      :is-importing-recipe="isImportingRecipe"
       @export="editorStore.exportImage"
-      @reset="editorStore.resetEdits"
+      @export-recipe="editorStore.exportRecipe"
+      @import-recipe="editorStore.loadRecipe"
     />
 
     <v-main>

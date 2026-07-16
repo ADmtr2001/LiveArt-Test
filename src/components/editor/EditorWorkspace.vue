@@ -9,12 +9,12 @@ import { useEditorStore } from '../../stores/editor'
 const editorStore = useEditorStore()
 const {
   editDocument,
+  hasEdits,
   hasImage,
   isComparingOriginal,
   isCropping,
   source,
   isLoadingSource,
-  isImportingRecipe,
   sourceError,
 } = storeToRefs(editorStore)
 </script>
@@ -33,10 +33,14 @@ const {
       :error="sourceError"
       :edit-document="editDocument"
       :is-loading="isLoadingSource"
+      :has-edits="hasEdits"
+      :is-comparing="isComparingOriginal"
       :show-original="isComparingOriginal"
       :source="source"
       @file-selected="editorStore.loadSource"
+      @compare="editorStore.setComparingOriginal"
       @remove-source="editorStore.clearSource"
+      @reset="editorStore.resetEdits"
     />
     <EditorSidebar
       :adjustments="editDocument.adjustments"
@@ -44,10 +48,7 @@ const {
       :has-crop="editDocument.crop !== null"
       :has-image="hasImage"
       :is-cropping="isCropping"
-      :is-importing-recipe="isImportingRecipe"
       @edit-crop="editorStore.enterCropMode"
-      @export-recipe="editorStore.exportRecipe"
-      @import-recipe="editorStore.loadRecipe"
       @reset-adjustment="editorStore.resetAdjustment"
       @reset-crop="editorStore.resetCrop"
       @set-filter="editorStore.setFilter"
@@ -60,11 +61,13 @@ const {
 .editor-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--editor-sidebar-width);
+  gap: var(--editor-shell-gap);
   width: 100%;
   height: calc(100dvh - var(--editor-toolbar-height));
   min-height: 0;
   overflow: hidden;
-  background: rgb(var(--v-theme-background));
+  padding: 0 var(--editor-shell-gap) var(--editor-shell-gap);
+  background: transparent;
 }
 
 @media (max-width: 959px) {

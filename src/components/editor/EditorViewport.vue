@@ -13,11 +13,15 @@ const props = defineProps<{
   isLoading: boolean
   error: string | null
   showOriginal: boolean
+  hasEdits: boolean
+  isComparing: boolean
 }>()
 
 const emit = defineEmits<{
   fileSelected: [file: File]
   removeSource: []
+  compare: [active: boolean]
+  reset: []
 }>()
 
 const canvas = ref<HTMLCanvasElement | null>(null)
@@ -65,10 +69,14 @@ const { isRendering, renderError } = useImageRenderer({
         </div>
         <ImageSourceControls
           :error="error"
+          :has-edits="hasEdits"
+          :is-comparing="isComparing"
           :loading="isLoading"
           :source="source"
           @file-selected="emit('fileSelected', $event)"
+          @compare="emit('compare', $event)"
           @remove="emit('removeSource')"
+          @reset="emit('reset')"
         />
       </div>
       <ImageDropzone
@@ -85,9 +93,10 @@ const { isRendering, renderError } = useImageRenderer({
 .editor-viewport {
   min-width: 0;
   min-height: 0;
-  padding: var(--editor-page-gutter);
+  padding: 0;
   overflow: hidden;
-  background-color: var(--editor-workspace-background);
+  border-radius: var(--editor-radius-lg);
+  background-color: transparent;
   background-image:
     linear-gradient(45deg, rgb(255 255 255 / 0.025) 25%, transparent 25%),
     linear-gradient(-45deg, rgb(255 255 255 / 0.025) 25%, transparent 25%),
@@ -110,7 +119,9 @@ const { isRendering, renderError } = useImageRenderer({
   border: 1px solid var(--editor-subtle-border);
   border-radius: var(--editor-radius-lg);
   background: var(--editor-stage-background);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.025);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.025),
+    var(--editor-island-shadow);
 }
 
 .editor-viewport__image {

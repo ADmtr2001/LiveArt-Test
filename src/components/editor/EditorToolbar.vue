@@ -1,114 +1,51 @@
 <script setup lang="ts">
 import {
-  mdiBackupRestore,
-  mdiCompare,
   mdiDownloadOutline,
+  mdiFileExportOutline,
+  mdiFileImportOutline,
   mdiImageEditOutline,
+  mdiMenuDown,
 } from '@mdi/js'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ref } from 'vue'
 
 import { EDITOR_LAYOUT } from '../../constants/editor'
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
-    canCompare?: boolean
     canExport?: boolean
-    hasEdits?: boolean
     hasImage?: boolean
     isExporting?: boolean
-    isComparing?: boolean
+    isImportingRecipe?: boolean
   }>(),
   {
-    canCompare: false,
     canExport: false,
-    hasEdits: false,
     hasImage: false,
     isExporting: false,
-    isComparing: false,
+    isImportingRecipe: false,
   },
 )
 
 const emit = defineEmits<{
-  compare: [active: boolean]
-  reset: []
   export: []
+  exportRecipe: []
+  importRecipe: [file: File]
 }>()
 
-const showResetConfirmation = ref(false)
-let compareInteractionActive = false
+const recipeInput = ref<HTMLInputElement | null>(null)
 
-function startCompare(): void {
-  if (!props.canCompare || compareInteractionActive) {
-    return
-  }
-
-  compareInteractionActive = true
-  emit('compare', true)
+function selectRecipe(): void {
+  recipeInput.value?.click()
 }
 
-function stopCompare(): void {
-  if (!compareInteractionActive && !props.isComparing) {
-    return
-  }
+function handleRecipeSelection(event: Event): void {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
 
-  compareInteractionActive = false
-  emit('compare', false)
-}
-
-function handlePointerDown(event: PointerEvent): void {
-  if (event.button === 0) {
-    startCompare()
+  if (file) {
+    emit('importRecipe', file)
   }
 }
-
-function handleKeyDown(event: KeyboardEvent): void {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault()
-    startCompare()
-  }
-}
-
-function handleKeyUp(event: KeyboardEvent): void {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault()
-    stopCompare()
-  }
-}
-
-function requestReset(): void {
-  if (props.hasEdits) {
-    showResetConfirmation.value = true
-  }
-}
-
-function confirmReset(): void {
-  showResetConfirmation.value = false
-  emit('reset')
-}
-
-watch(
-  () => props.canCompare,
-  (canCompare) => {
-    if (!canCompare) {
-      stopCompare()
-    }
-  },
-)
-
-onMounted(() => {
-  window.addEventListener('pointerup', stopCompare)
-  window.addEventListener('pointercancel', stopCompare)
-  window.addEventListener('keyup', handleKeyUp)
-  window.addEventListener('blur', stopCompare)
-})
-
-onBeforeUnmount(() => {
-  stopCompare()
-  window.removeEventListener('pointerup', stopCompare)
-  window.removeEventListener('pointercancel', stopCompare)
-  window.removeEventListener('keyup', handleKeyUp)
-  window.removeEventListener('blur', stopCompare)
-})
 </script>
 
 <template>
@@ -118,94 +55,103 @@ onBeforeUnmount(() => {
     elevation="0"
     :height="EDITOR_LAYOUT.toolbarHeight"
   >
-    <div class="editor-toolbar__brand" aria-label="LiveArt image editor">
-      <v-avatar color="primary" rounded="lg" size="36">
-        <v-icon :icon="mdiImageEditOutline" size="22" />
-      </v-avatar>
+    <div class="editor-toolbar__surface">
+      <div class="editor-toolbar__brand" aria-label="LiveArt image editor">
+        <v-avatar color="primary" rounded="lg" size="32">
+          <v-icon :icon="mdiImageEditOutline" size="20" />
+        </v-avatar>
 
-      <div class="editor-toolbar__brand-copy">
-        <span class="editor-toolbar__title">LiveArt</span>
-        <span class="editor-toolbar__subtitle">Image editor</span>
+        <div class="editor-toolbar__brand-copy">
+          <span class="editor-toolbar__title">LiveArt</span>
+          <span class="editor-toolbar__subtitle">Image editor</span>
+        </div>
       </div>
+
+      <v-spacer />
+
+      <nav class="editor-toolbar__actions" aria-label="Editor actions">
+        <input
+          ref="recipeInput"
+          accept="application/json,.json"
+          aria-hidden="true"
+          class="editor-toolbar__recipe-input"
+          :disabled="!hasImage || isImportingRecipe"
+          tabindex="-1"
+          type="file"
+          @change="handleRecipeSelection"
+        />
+
+        <v-menu location="bottom end">
+          <template #activator="{ props: activatorProps }">
+            <v-btn
+              v-bind="activatorProps"
+              :append-icon="mdiMenuDown"
+              aria-label="Recipe actions"
+              class="editor-toolbar__recipe"
+              color="primary"
+              :disabled="!canExport"
+              :loading="isImportingRecipe"
+              variant="outlined"
+            >
+              Recipe
+            </v-btn>
+          </template>
+
+          <v-list density="compact" min-width="210">
+            <v-list-item
+              :disabled="isImportingRecipe"
+              :prepend-icon="mdiFileImportOutline"
+              title="Import recipe…"
+              @click="selectRecipe"
+            />
+            <v-list-item
+              :disabled="isImportingRecipe"
+              :prepend-icon="mdiFileExportOutline"
+              title="Export recipe"
+              @click="emit('exportRecipe')"
+            />
+          </v-list>
+        </v-menu>
+
+        <v-btn
+          class="editor-toolbar__export"
+          color="primary"
+          :disabled="!canExport"
+          :loading="isExporting"
+          :prepend-icon="mdiDownloadOutline"
+          :aria-label="isExporting ? 'Exporting image' : 'Export image'"
+          variant="flat"
+          @click="emit('export')"
+        >
+          <span class="editor-toolbar__export-label">Export</span>
+        </v-btn>
+      </nav>
     </div>
-
-    <v-spacer />
-
-    <nav class="editor-toolbar__actions" aria-label="Editor actions">
-      <v-chip
-        v-if="hasImage"
-        class="editor-toolbar__status"
-        :color="isComparing ? 'secondary' : hasEdits ? 'primary' : undefined"
-        size="small"
-        variant="tonal"
-      >
-        {{ isComparing ? 'Original' : hasEdits ? 'Edited' : 'Unedited' }}
-      </v-chip>
-
-      <v-btn
-        :disabled="!canCompare"
-        :icon="mdiCompare"
-        :aria-pressed="isComparing"
-        aria-label="View original"
-        variant="text"
-        title="Hold to view original"
-        @blur="stopCompare"
-        @keydown="handleKeyDown"
-        @pointercancel="stopCompare"
-        @pointerdown="handlePointerDown"
-        @pointerleave="stopCompare"
-        @pointerup="stopCompare"
-      />
-
-      <v-btn
-        :disabled="!hasEdits"
-        :icon="mdiBackupRestore"
-        aria-label="Reset all edits"
-        title="Reset all edits"
-        variant="text"
-        @click="requestReset"
-      />
-
-      <v-divider class="editor-toolbar__divider" vertical />
-
-      <v-btn
-        class="editor-toolbar__export"
-        color="primary"
-        :disabled="!canExport"
-        :loading="isExporting"
-        :prepend-icon="mdiDownloadOutline"
-        :aria-label="isExporting ? 'Exporting image' : 'Export image'"
-        variant="flat"
-        @click="emit('export')"
-      >
-        <span class="editor-toolbar__export-label">Export</span>
-      </v-btn>
-    </nav>
-
-    <v-dialog v-model="showResetConfirmation" max-width="420">
-      <v-card>
-        <v-card-title>Reset all edits?</v-card-title>
-        <v-card-text>
-          Crop and adjustments will return to their original values. Your source image
-          will not be changed.
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="text" @click="showResetConfirmation = false">Cancel</v-btn>
-          <v-btn color="primary" variant="flat" @click="confirmReset">Reset all</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-app-bar>
 </template>
 
 <style scoped>
 .editor-toolbar {
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .editor-toolbar :deep(.v-toolbar__content) {
-  padding-inline: var(--editor-page-gutter);
+  padding: 8px var(--editor-shell-gap);
+}
+
+.editor-toolbar__surface {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  padding-inline: var(--editor-space-4);
+  overflow: hidden;
+  border: 1px solid var(--editor-subtle-border);
+  border-radius: var(--editor-radius-lg);
+  background: var(--editor-island-background);
+  box-shadow: var(--editor-island-shadow);
+  backdrop-filter: var(--editor-surface-filter);
 }
 
 .editor-toolbar__brand {
@@ -239,22 +185,20 @@ onBeforeUnmount(() => {
   gap: 0.25rem;
 }
 
-.editor-toolbar__status {
-  margin-right: var(--editor-space-2);
-}
-
-.editor-toolbar__divider {
-  height: 28px;
-  margin-inline: var(--editor-space-2);
-}
-
 .editor-toolbar__export {
   min-width: 112px;
 }
 
+.editor-toolbar__recipe-input {
+  display: none;
+}
+
+.editor-toolbar__recipe {
+  min-width: 104px;
+}
+
 @media (max-width: 599px) {
   .editor-toolbar__subtitle,
-  .editor-toolbar__divider,
   .editor-toolbar__export-label {
     display: none;
   }
@@ -273,8 +217,14 @@ onBeforeUnmount(() => {
     display: none;
   }
 
-  .editor-toolbar__status {
-    margin-right: 0;
+  .editor-toolbar__surface {
+    padding-inline: var(--editor-space-2);
+    border-radius: var(--editor-radius-md);
+  }
+
+  .editor-toolbar__recipe {
+    min-width: 88px;
+    padding-inline: var(--editor-space-2);
   }
 }
 </style>
