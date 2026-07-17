@@ -81,12 +81,28 @@ renders from replacing newer previews.
 Import is atomic and validates the schema, ranges, MIME type, and source
 dimensions before replacing edits.
 
-## Decisions and limitations
+## Implementation notes
 
+### Key decisions
+
+- The original `File` is immutable. Pinia stores only a versioned edit document;
+  preview, recipe replay, and export always derive from the same source.
+- Crop uses a local draft and commits source-pixel coordinates only on Apply, so
+  Cancel has no side effects and recipes are independent of viewport size.
+- Adjustments are canonical values, not an event log. This keeps slider input,
+  rendering, and JSON compact and deterministic.
 - Canvas 2D keeps preview/export consistent; a print-grade evolution would need
   workers, WebGL/WebGPU, ICC profiles, high bit depth, CMYK, and spot colours.
 - PNG is the only export format to preserve alpha predictably.
 - Cropper runtime state is component-local; Pinia stores only committed geometry.
+
+### Bonus
+
+- Both optional bonuses were implemented: adjustable greyscale/sepia filters and
+  versioned JSON export; recipe import was added to demonstrate replayability.
+
+### Limitations
+
 - There is no undo/redo, persistence, or cryptographic source fingerprint.
 - Processing uses the main browser thread and is limited to `16,384px` per side
   and 40 megapixels to avoid unsafe Canvas allocations.
