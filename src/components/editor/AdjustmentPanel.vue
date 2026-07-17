@@ -9,10 +9,12 @@ withDefaults(
     adjustments: AdjustmentOperation
     hasImage?: boolean
     isCropping?: boolean
+    disabled?: boolean
   }>(),
   {
     hasImage: false,
     isCropping: false,
+    disabled: false,
   },
 )
 
@@ -46,6 +48,7 @@ function formatPercentage(value: number): string {
             <v-btn
               :aria-label="`Reset ${adjustment.label.toLowerCase()} to 100%`"
               :disabled="
+                disabled ||
                 !hasImage ||
                 isCropping ||
                 adjustments[adjustment.id] === DEFAULT_ADJUSTMENT_VALUE
@@ -63,7 +66,7 @@ function formatPercentage(value: number): string {
           :aria-label="adjustment.label"
           color="primary"
           density="compact"
-          :disabled="!hasImage || isCropping"
+          :disabled="disabled || !hasImage || isCropping"
           hide-details
           :max="adjustment.max"
           :min="adjustment.min"

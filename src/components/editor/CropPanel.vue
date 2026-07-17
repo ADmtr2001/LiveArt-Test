@@ -6,11 +6,13 @@ withDefaults(
     hasImage?: boolean
     hasCrop?: boolean
     isCropping?: boolean
+    disabled?: boolean
   }>(),
   {
     hasImage: false,
     hasCrop: false,
     isCropping: false,
+    disabled: false,
   },
 )
 
@@ -28,7 +30,7 @@ const emit = defineEmits<{
       <v-btn
         :prepend-icon="mdiCrop"
         block
-        :disabled="!hasImage || isCropping"
+        :disabled="disabled || !hasImage || isCropping"
         variant="tonal"
         @click="emit('editCrop')"
       >
@@ -38,7 +40,7 @@ const emit = defineEmits<{
         v-if="hasCrop"
         :prepend-icon="mdiBackupRestore"
         block
-        :disabled="isCropping"
+        :disabled="disabled || isCropping"
         variant="text"
         @click="emit('resetCrop')"
       >

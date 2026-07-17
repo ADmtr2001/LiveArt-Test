@@ -26,6 +26,16 @@ function requireFiniteNumber(value: unknown, path: string): number {
   return value
 }
 
+function requireInteger(value: unknown, path: string): number {
+  const parsedValue = requireFiniteNumber(value, path)
+
+  if (!Number.isInteger(parsedValue)) {
+    throw new Error(`${path} must be an integer.`)
+  }
+
+  return parsedValue
+}
+
 function parseRecipe(value: unknown, source: ImageSource): EditDocument {
   if (!isRecord(value) || value.schemaVersion !== EDIT_DOCUMENT_SCHEMA_VERSION) {
     throw new Error('This recipe schema version is not supported.')
@@ -79,10 +89,10 @@ function parseRecipe(value: unknown, source: ImageSource): EditDocument {
       throw new Error('The recipe crop operation is invalid.')
     }
 
-    const x = requireFiniteNumber(operations.crop.x, 'operations.crop.x')
-    const y = requireFiniteNumber(operations.crop.y, 'operations.crop.y')
-    const width = requireFiniteNumber(operations.crop.width, 'operations.crop.width')
-    const height = requireFiniteNumber(operations.crop.height, 'operations.crop.height')
+    const x = requireInteger(operations.crop.x, 'operations.crop.x')
+    const y = requireInteger(operations.crop.y, 'operations.crop.y')
+    const width = requireInteger(operations.crop.width, 'operations.crop.width')
+    const height = requireInteger(operations.crop.height, 'operations.crop.height')
     if (
       x < 0 ||
       y < 0 ||

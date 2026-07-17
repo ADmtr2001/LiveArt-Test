@@ -27,6 +27,9 @@ export const useEditorStore = defineStore('editor', () => {
 
   const hasImage = computed(() => source.value !== null)
   const hasEdits = computed(() => hasDocumentEdits(editDocument.value))
+  const isFileOperationRunning = computed(
+    () => isLoadingSource.value || isExporting.value || isImportingRecipe.value,
+  )
 
   function resetEdits(): void {
     editDocument.value = createDefaultEditDocument()
@@ -105,7 +108,13 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   async function exportImage(): Promise<void> {
-    if (!source.value || isExporting.value || isCropping.value) {
+    if (
+      !source.value ||
+      isExporting.value ||
+      isImportingRecipe.value ||
+      isLoadingSource.value ||
+      isCropping.value
+    ) {
       return
     }
 
@@ -132,7 +141,13 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   function exportRecipe(): void {
-    if (!source.value || isCropping.value || isExporting.value) {
+    if (
+      !source.value ||
+      isCropping.value ||
+      isExporting.value ||
+      isImportingRecipe.value ||
+      isLoadingSource.value
+    ) {
       return
     }
 
@@ -147,7 +162,13 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   async function loadRecipe(file: File): Promise<void> {
-    if (!source.value || isCropping.value || isImportingRecipe.value) {
+    if (
+      !source.value ||
+      isCropping.value ||
+      isImportingRecipe.value ||
+      isExporting.value ||
+      isLoadingSource.value
+    ) {
       return
     }
 
@@ -176,6 +197,10 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   async function loadSource(file: File): Promise<void> {
+    if (isExporting.value || isImportingRecipe.value || isLoadingSource.value) {
+      return
+    }
+
     const validation = validateImageFile(file)
 
     if (!validation.valid) {
@@ -227,6 +252,14 @@ export const useEditorStore = defineStore('editor', () => {
     resetEdits()
   }
 
+  function removeSource(): void {
+    if (isFileOperationRunning.value) {
+      return
+    }
+
+    clearSource()
+  }
+
   return {
     source,
     isLoadingSource,
@@ -240,8 +273,10 @@ export const useEditorStore = defineStore('editor', () => {
     recipeError,
     hasImage,
     hasEdits,
+    isFileOperationRunning,
     loadSource,
     clearSource,
+    removeSource,
     resetEdits,
     setComparingOriginal,
     setCrop,

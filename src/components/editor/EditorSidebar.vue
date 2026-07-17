@@ -15,6 +15,7 @@ withDefaults(
   defineProps<{
     adjustments: AdjustmentOperation
     filter: FilterOperation | null
+    disabled?: boolean
     hasImage?: boolean
     hasCrop?: boolean
     isCropping?: boolean
@@ -23,6 +24,7 @@ withDefaults(
     hasImage: false,
     hasCrop: false,
     isCropping: false,
+    disabled: false,
   },
 )
 
@@ -66,6 +68,7 @@ function updateAdjustment(id: AdjustmentId, value: number): void {
       v-show="activeTool === 'crop'"
       :has-crop="hasCrop"
       :has-image="hasImage"
+      :disabled="disabled"
       :is-cropping="isCropping"
       @edit-crop="emit('editCrop')"
       @reset-crop="emit('resetCrop')"
@@ -74,6 +77,7 @@ function updateAdjustment(id: AdjustmentId, value: number): void {
     <AdjustmentPanel
       v-show="activeTool === 'adjustments'"
       :adjustments="adjustments"
+      :disabled="disabled"
       :has-image="hasImage"
       :is-cropping="isCropping"
       @reset-adjustment="emit('resetAdjustment', $event)"
@@ -83,6 +87,7 @@ function updateAdjustment(id: AdjustmentId, value: number): void {
     <FilterPanel
       v-show="activeTool === 'filters'"
       :filter="filter"
+      :disabled="disabled"
       :has-image="hasImage"
       :is-cropping="isCropping"
       @set-filter="emit('setFilter', $event)"

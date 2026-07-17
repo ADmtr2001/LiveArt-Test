@@ -8,10 +8,17 @@ import { EDITOR_LAYOUT } from './constants/editor'
 import { useEditorStore } from './stores/editor'
 
 const editorStore = useEditorStore()
-const { exportError, hasImage, isCropping, isExporting, isImportingRecipe, recipeError } =
-  storeToRefs(editorStore)
+const {
+  exportError,
+  hasImage,
+  isCropping,
+  isExporting,
+  isFileOperationRunning,
+  isImportingRecipe,
+  recipeError,
+} = storeToRefs(editorStore)
 const canExport = computed(
-  () => hasImage.value && !isCropping.value && !isExporting.value,
+  () => hasImage.value && !isCropping.value && !isFileOperationRunning.value,
 )
 
 onUnmounted(editorStore.clearSource)

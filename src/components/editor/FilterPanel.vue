@@ -12,10 +12,12 @@ const props = withDefaults(
     filter: FilterOperation | null
     hasImage?: boolean
     isCropping?: boolean
+    disabled?: boolean
   }>(),
   {
     hasImage: false,
     isCropping: false,
+    disabled: false,
   },
 )
 
@@ -54,7 +56,7 @@ function updateFilterAmount(amount: number): void {
         :key="filterDefinition.id"
         :active="filter?.name === filterDefinition.id"
         :aria-pressed="filter?.name === filterDefinition.id"
-        :disabled="!hasImage || isCropping"
+        :disabled="disabled || !hasImage || isCropping"
         size="small"
         variant="tonal"
         @click="toggleFilter(filterDefinition.id)"
@@ -73,7 +75,7 @@ function updateFilterAmount(amount: number): void {
         aria-label="Filter amount"
         color="primary"
         density="compact"
-        :disabled="!hasImage || isCropping"
+        :disabled="disabled || !hasImage || isCropping"
         hide-details
         :max="MAX_FILTER_AMOUNT"
         :min="MIN_FILTER_AMOUNT"

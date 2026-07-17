@@ -15,6 +15,7 @@ const props = defineProps<{
   showOriginal: boolean
   hasEdits: boolean
   isComparing: boolean
+  sourceActionsDisabled: boolean
 }>()
 
 const emit = defineEmits<{
@@ -72,6 +73,7 @@ const { isRendering, renderError } = useImageRenderer({
           :has-edits="hasEdits"
           :is-comparing="isComparing"
           :loading="isLoading"
+          :source-actions-disabled="sourceActionsDisabled"
           :source="source"
           @file-selected="emit('fileSelected', $event)"
           @compare="emit('compare', $event)"

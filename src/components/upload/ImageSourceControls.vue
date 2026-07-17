@@ -17,6 +17,7 @@ const props = defineProps<{
   error: string | null
   hasEdits: boolean
   isComparing: boolean
+  sourceActionsDisabled: boolean
 }>()
 
 const emit = defineEmits<{
@@ -91,7 +92,7 @@ onBeforeUnmount(() => {
   <div class="image-source-controls" :aria-busy="loading">
     <ImageFileInput
       ref="fileInput"
-      :disabled="loading"
+      :disabled="loading || sourceActionsDisabled"
       @file-selected="emit('fileSelected', $event)"
     />
 
@@ -113,7 +114,7 @@ onBeforeUnmount(() => {
       <v-btn
         :active="isComparing"
         :color="isComparing ? 'secondary' : undefined"
-        :disabled="!hasEdits"
+        :disabled="sourceActionsDisabled || !hasEdits"
         :prepend-icon="mdiCompare"
         :aria-pressed="isComparing"
         aria-label="View original"
@@ -130,7 +131,7 @@ onBeforeUnmount(() => {
         <span class="image-source-controls__action-label">Hold original</span>
       </v-btn>
       <v-btn
-        :disabled="!hasEdits"
+        :disabled="sourceActionsDisabled || !hasEdits"
         :prepend-icon="mdiBackupRestore"
         aria-label="Reset all edits"
         size="small"
@@ -146,6 +147,7 @@ onBeforeUnmount(() => {
       <v-btn
         class="image-source-controls__replace"
         aria-label="Replace image"
+        :disabled="sourceActionsDisabled"
         :prepend-icon="mdiSwapHorizontal"
         :loading="loading"
         size="small"
@@ -158,6 +160,7 @@ onBeforeUnmount(() => {
         :icon="mdiDeleteOutline"
         aria-label="Remove image"
         color="error"
+        :disabled="sourceActionsDisabled"
         size="small"
         title="Remove image"
         variant="text"

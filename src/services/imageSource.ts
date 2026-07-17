@@ -1,4 +1,5 @@
 import type { ImageSource } from '../types/image'
+import { validateDecodedImage } from '../utils/fileValidation'
 import { loadImageElement } from './imageLoader'
 
 export async function createImageSource(file: File): Promise<ImageSource> {
@@ -6,6 +7,11 @@ export async function createImageSource(file: File): Promise<ImageSource> {
 
   try {
     const image = await loadImageElement(objectUrl)
+    const validation = validateDecodedImage(image.naturalWidth, image.naturalHeight)
+
+    if (!validation.valid) {
+      throw new Error(validation.message)
+    }
 
     return {
       file,

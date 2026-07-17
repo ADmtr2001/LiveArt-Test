@@ -14,6 +14,7 @@ const {
   isComparingOriginal,
   isCropping,
   source,
+  isFileOperationRunning,
   isLoadingSource,
   sourceError,
 } = storeToRefs(editorStore)
@@ -35,15 +36,17 @@ const {
       :is-loading="isLoadingSource"
       :has-edits="hasEdits"
       :is-comparing="isComparingOriginal"
+      :source-actions-disabled="isFileOperationRunning"
       :show-original="isComparingOriginal"
       :source="source"
       @file-selected="editorStore.loadSource"
       @compare="editorStore.setComparingOriginal"
-      @remove-source="editorStore.clearSource"
+      @remove-source="editorStore.removeSource"
       @reset="editorStore.resetEdits"
     />
     <EditorSidebar
       :adjustments="editDocument.adjustments"
+      :disabled="isFileOperationRunning"
       :filter="editDocument.filter"
       :has-crop="editDocument.crop !== null"
       :has-image="hasImage"
